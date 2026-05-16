@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}KSAH — Modern Fashion{% endblock %}</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}"/>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ── Navbar ───────────────────────────────────────────────────── -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top" id="mainNav">
+  <div class="container">
+    <!-- Brand -->
+    <a class="navbar-brand fw-bold" href="{{ url_for('customer.home') }}">
+      <span class="brand-text">KSAH</span>
+    </a>
+
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navContent">
+      <!-- Center nav links -->
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('customer.home') }}">Home</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Collections</a>
+          <ul class="dropdown-menu border-0 shadow-sm">
+            <li><a class="dropdown-item" href="{{ url_for('customer.products', category='Men') }}">Men</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('customer.products', category='Women') }}">Women</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('customer.products', category='Accessories') }}">Accessories</a></li>
+            <li><hr class="dropdown-divider"/></li>
+            <li><a class="dropdown-item text-danger fw-500" href="{{ url_for('customer.products', category='Sale') }}">Sale</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('customer.products') }}">All Products</a></li>
+      </ul>
+
+      <!-- Search -->
+      <form class="d-flex search-form me-3" action="{{ url_for('customer.search') }}" method="get">
+        <div class="search-wrapper position-relative">
+          <input class="form-control search-input" type="search" name="q"
+                 placeholder="Search styles…" autocomplete="off"
+                 value="{{ request.args.get('q', '') }}" id="searchInput"/>
+          <div class="search-suggestions" id="searchSuggestions"></div>
+        </div>
+        <button class="btn btn-search ms-1" type="submit">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+
+      <!-- Right icons -->
+      <ul class="navbar-nav align-items-center gap-2">
+        {% if current_user.is_authenticated %}
+          {% if current_user.role == 'customer' %}
+          <li class="nav-item">
+            <a class="nav-link nav-icon" href="{{ url_for('customer.wishlist') }}" title="Wishlist">
+              <i class="far fa-heart"></i>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-icon position-relative" href="{{ url_for('customer.cart') }}" title="Cart">
+              <i class="fas fa-shopping-bag"></i>
+              {% if cart_count > 0 %}
+              <span class="cart-badge">{{ cart_count }}</span>
+              {% endif %}
+            </a>
+          </li>
+          {% endif %}
+          <li class="nav-item dropdown">
+            <a class="nav-link nav-icon d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
+              <div class="avatar-circle">{{ current_user.name[0].upper() }}</div>
+              <span class="d-none d-lg-inline small">{{ current_user.name.split()[0] }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+              <li><span class="dropdown-item-text text-muted small">{{ current_user.email }}</span></li>
+              <li><hr class="dropdown-divider"/></li>
+              {% if current_user.role == 'customer' %}
+              <li><a class="dropdown-item" href="{{ url_for('customer.orders') }}"><i class="fas fa-box me-2"></i>My Orders</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('customer.wishlist') }}"><i class="far fa-heart me-2"></i>Wishlist</a></li>
+              {% elif current_user.role == 'seller' %}
+              <li><a class="dropdown-item" href="{{ url_for('seller.dashboard') }}"><i class="fas fa-chart-bar me-2"></i>Dashboard</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('seller.products') }}"><i class="fas fa-box me-2"></i>My Products</a></li>
+              {% elif current_user.role == 'admin' %}
+              <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}"><i class="fas fa-cog me-2"></i>Admin Panel</a></li>
+              {% endif %}
+              <li><hr class="dropdown-divider"/></li>
+              <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+            </ul>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-dark btn-sm px-3" href="{{ url_for('auth.register') }}">Sign Up</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Flash Messages ────────────────────────────────────────────── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1100">
+    {% for category, message in messages %}
+    <div class="toast align-items-center border-0 show toast-{{ category }}" role="alert">
+      <div class="d-flex">
+        <div class="toast-body">
+          {% if category == 'success' %}<i class="fas fa-check-circle me-2 text-success"></i>
+          {% elif category == 'error' %}<i class="fas fa-exclamation-circle me-2 text-danger"></i>
+          {% elif category == 'warning' %}<i class="fas fa-exclamation-triangle me-2 text-warning"></i>
+          {% else %}<i class="fas fa-info-circle me-2 text-info"></i>{% endif %}
+          {{ message }}
+        </div>
+        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+<!-- ── Main Content ───────────────────────────────────────────────── -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ── Footer ────────────────────────────────────────────────────── -->
+{% block footer %}
+<footer class="site-footer">
+  <div class="container">
+    <div class="row g-4 py-5">
+      <div class="col-lg-4">
+        <h5 class="footer-brand mb-3">KSAH</h5>
+        <p class="text-muted small">Premium fashion for the modern individual. Curated collections from the world's finest brands.</p>
+        <div class="social-icons mt-3">
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-pinterest-p"></i></a>
+          <a href="#"><i class="fab fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 class="footer-heading">Shop</h6>
+        <ul class="list-unstyled footer-links">
+          <li><a href="{{ url_for('customer.products', category='Men') }}">Men</a></li>
+          <li><a href="{{ url_for('customer.products', category='Women') }}">Women</a></li>
+          <li><a href="{{ url_for('customer.products', category='Accessories') }}">Accessories</a></li>
+          <li><a href="{{ url_for('customer.products', category='Sale') }}">Sale</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 class="footer-heading">Help</h6>
+        <ul class="list-unstyled footer-links">
+          <li><a href="#">Size Guide</a></li>
+          <li><a href="#">Shipping Info</a></li>
+          <li><a href="#">Returns</a></li>
+          <li><a href="{{ url_for('customer.contact') }}">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4">
+        <h6 class="footer-heading">Newsletter</h6>
+        <p class="text-muted small">Get new arrivals and exclusive offers delivered to your inbox.</p>
+        <form class="d-flex gap-2">
+          <input type="email" class="form-control form-control-sm" placeholder="your@email.com"/>
+          <button class="btn btn-dark btn-sm px-3">Subscribe</button>
+        </form>
+      </div>
+    </div>
+    <hr class="border-light"/>
+    <div class="row align-items-center py-3">
+      <div class="col-md-6 small text-muted">© 2026 KSAH Fashion. ICT602 Group Project.</div>
+      <div class="col-md-6 text-md-end">
+        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/visa.svg" alt="Visa" height="20" class="me-2 opacity-50"/>
+        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/mastercard.svg" alt="MC" height="20" class="me-2 opacity-50"/>
+        <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/paypal.svg" alt="PayPal" height="20" class="opacity-50"/>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock %}
+
+<!-- ── Scripts ─────────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

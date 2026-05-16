@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}My Orders — KSAH{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1 class="mb-0">My Orders</h1>
+  </div>
+</div>
+
+<div class="container py-5">
+  {% if orders %}
+  <div class="dashboard-table">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Date</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td>
+            <div class="fw-600 small">{{ order.order_number }}</div>
+            <div class="text-muted" style="font-size:11px">{{ order.tracking_id }}</div>
+          </td>
+          <td class="small text-muted">{{ order.created_at.strftime('%d %b %Y') if order.created_at else '-' }}</td>
+          <td class="small">{{ order.items|length }} item{% if order.items|length != 1 %}s{% endif %}</td>
+          <td class="fw-600 small">RM{{ "%.2f"|format(order.total) }}</td>
+          <td><span class="badge-status badge-{{ order.status }}">{{ order.status|title }}</span></td>
+          <td>
+            <a href="{{ url_for('customer.track_order', order_id=order._id) }}"
+               class="btn btn-sm btn-outline-dark">Track</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-center py-5">
+    <div style="font-size:3rem;margin-bottom:16px">📦</div>
+    <h5>No orders yet</h5>
+    <p class="text-muted">Start shopping to see your orders here.</p>
+    <a href="{{ url_for('customer.products') }}" class="btn btn-dark">Shop Now</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

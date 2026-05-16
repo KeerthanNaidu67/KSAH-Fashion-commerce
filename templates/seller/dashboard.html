@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Seller Dashboard — KSAH{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">KSAH<span style="font-size:.7rem;letter-spacing:1px;opacity:.5;display:block;font-weight:400">Seller Portal</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Overview</div>
+      <a href="{{ url_for('seller.dashboard') }}" class="sidebar-link active">
+        <span class="icon"><i class="fas fa-th-large"></i></span> Dashboard
+      </a>
+      <div class="sidebar-section-label">Products</div>
+      <a href="{{ url_for('seller.products') }}" class="sidebar-link">
+        <span class="icon"><i class="fas fa-box"></i></span> My Products
+      </a>
+      <a href="{{ url_for('seller.add_product') }}" class="sidebar-link">
+        <span class="icon"><i class="fas fa-plus-circle"></i></span> Add Product
+      </a>
+      <div class="sidebar-section-label">Sales</div>
+      <a href="{{ url_for('seller.orders') }}" class="sidebar-link">
+        <span class="icon"><i class="fas fa-shopping-bag"></i></span> Orders
+      </a>
+      <div class="sidebar-section-label">Account</div>
+      <a href="{{ url_for('customer.home') }}" class="sidebar-link">
+        <span class="icon"><i class="fas fa-store"></i></span> View Store
+      </a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+        <span class="icon"><i class="fas fa-sign-out-alt"></i></span> Logout
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="dashboard-main">
+    <div class="dashboard-header d-flex justify-content-between align-items-start">
+      <div>
+        <div class="dashboard-title">Welcome back, {{ current_user.name }}! 👋</div>
+        <div class="dashboard-subtitle">Here's what's happening with your store today.</div>
+      </div>
+      <a href="{{ url_for('seller.add_product') }}" class="btn btn-dark">
+        <i class="fas fa-plus me-2"></i> Add Product
+      </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-box"></i></div>
+          <div class="stat-value">{{ total_products }}</div>
+          <div class="stat-label">Total Products</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-dollar-sign"></i></div>
+          <div class="stat-value">RM{{ "%.0f"|format(total_revenue) }}</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-shopping-bag"></i></div>
+          <div class="stat-value">{{ total_orders }}</div>
+          <div class="stat-label">Total Orders</div>
+          {% if low_stock > 0 %}
+          <div class="stat-change down">{{ low_stock }} low stock</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="stat-value">{{ out_of_stock }}</div>
+          <div class="stat-label">Out of Stock</div>
+          {% if out_of_stock > 0 %}
+          <div class="stat-change down">Action needed</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Low Stock Alert -->
+    {% if low_stock > 0 %}
+    <div class="mb-4 p-3 rounded-lg d-flex align-items-center gap-3"
+         style="background:#fef9e7;border:1px solid #ffd43b">
+      <i class="fas fa-exclamation-triangle text-warning fa-lg"></i>
+      <div>
+        <div class="fw-600 small">Low Stock Alert</div>
+        <div class="text-muted" style="font-size:12px">{{ low_stock }} product(s) have 5 or fewer units left.</div>
+      </div>
+      <a href="{{ url_for('seller.products') }}" class="btn btn-sm btn-warning ms-auto">View Inventory</a>
+    </div>
+    {% endif %}
+
+    <!-- Recent Orders -->
+    {% if recent_orders %}
+    <div class="dashboard-table">
+      <div class="table-title">Recent Orders</div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td class="fw-600 small">{{ order.order_number }}</td>
+            <td class="small">{{ order.user_name }}</td>
+            <td class="small text-muted">{{ order.items|length }} items</td>
+            <td class="fw-600 small">RM{{ "%.2f"|format(order.total) }}</td>
+            <td><span class="badge-status badge-{{ order.status }}">{{ order.status|title }}</span></td>
+            <td class="small text-muted">{{ order.created_at.strftime('%d %b') if order.created_at else '-' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="p-3 text-center">
+        <a href="{{ url_for('seller.orders') }}" class="small text-muted">View all orders →</a>
+      </div>
+    </div>
+    {% else %}
+    <div class="dashboard-table">
+      <div class="table-title">Recent Orders</div>
+      <div class="text-center py-5 text-muted">No orders yet.</div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mt-3">
+      <div class="col-md-4">
+        <a href="{{ url_for('seller.add_product') }}" class="d-block p-4 border rounded-lg text-center text-decoration-none" style="transition:all .2s" onmouseover="this.style.borderColor='#111'" onmouseout="this.style.borderColor='#e8e8e8'">
+          <i class="fas fa-plus-circle fa-2x mb-2 text-accent"></i>
+          <div class="fw-600 small">Add New Product</div>
+          <div class="text-muted" style="font-size:11px">List a new item</div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{{ url_for('seller.products') }}" class="d-block p-4 border rounded-lg text-center text-decoration-none" style="transition:all .2s" onmouseover="this.style.borderColor='#111'" onmouseout="this.style.borderColor='#e8e8e8'">
+          <i class="fas fa-boxes fa-2x mb-2 text-accent"></i>
+          <div class="fw-600 small">Manage Inventory</div>
+          <div class="text-muted" style="font-size:11px">Update stock levels</div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{{ url_for('seller.orders') }}" class="d-block p-4 border rounded-lg text-center text-decoration-none" style="transition:all .2s" onmouseover="this.style.borderColor='#111'" onmouseout="this.style.borderColor='#e8e8e8'">
+          <i class="fas fa-shipping-fast fa-2x mb-2 text-accent"></i>
+          <div class="fw-600 small">Manage Orders</div>
+          <div class="text-muted" style="font-size:11px">Track and update orders</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

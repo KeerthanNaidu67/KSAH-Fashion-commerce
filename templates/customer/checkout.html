@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Checkout — KSAH{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1 class="mb-0">Checkout</h1>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4">
+    <!-- Form -->
+    <div class="col-lg-7">
+      <form method="POST" id="checkoutForm">
+
+        <!-- Shipping Address -->
+        <div class="p-4 border rounded-lg mb-4">
+          <h5 class="fw-600 mb-4"><i class="fas fa-map-marker-alt me-2 text-accent"></i>Shipping Address</h5>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-control" name="full_name" required
+                     value="{{ user.name }}"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Phone</label>
+              <input type="tel" class="form-control" name="phone" required
+                     value="{{ user.phone }}"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Country</label>
+              <select class="form-control" name="country">
+                <option value="Malaysia" selected>Malaysia</option>
+                <option value="Singapore">Singapore</option>
+                <option value="Indonesia">Indonesia</option>
+                <option value="Thailand">Thailand</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Street Address</label>
+              <input type="text" class="form-control" name="address" required
+                     placeholder="Enter your street address"
+                     value="{{ user.address.get('street','') if user.address else '' }}"/>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">City</label>
+              <input type="text" class="form-control" name="city" required
+                     placeholder="City"
+                     value="{{ user.address.get('city','') if user.address else '' }}"/>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">State</label>
+              <input type="text" class="form-control" name="state" placeholder="State"
+                     value="{{ user.address.get('state','') if user.address else '' }}"/>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Postcode</label>
+              <input type="text" class="form-control" name="zip_code" required
+                     placeholder="00000"
+                     value="{{ user.address.get('zip','') if user.address else '' }}"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="p-4 border rounded-lg mb-4">
+          <h5 class="fw-600 mb-4"><i class="fas fa-credit-card me-2 text-accent"></i>Payment Method</h5>
+          <div class="row g-3 mb-3">
+            <div class="col-12">
+              <label class="payment-card d-flex align-items-center gap-3 selected" id="payCard">
+                <input type="radio" name="payment_method" value="card" checked hidden
+                       onchange="showPayFields('card')"/>
+                <i class="fas fa-credit-card fa-lg text-muted"></i>
+                <div>
+                  <div class="fw-500 small">Credit / Debit Card</div>
+                  <div class="text-muted" style="font-size:11px">Visa, Mastercard</div>
+                </div>
+              </label>
+            </div>
+            <div class="col-6">
+              <label class="payment-card d-flex align-items-center gap-3" id="payWallet">
+                <input type="radio" name="payment_method" value="ewallet" hidden
+                       onchange="showPayFields('ewallet')"/>
+                <i class="fas fa-wallet fa-lg text-muted"></i>
+                <div>
+                  <div class="fw-500 small">E-Wallet</div>
+                  <div class="text-muted" style="font-size:11px">Touch 'n Go, GrabPay</div>
+                </div>
+              </label>
+            </div>
+            <div class="col-6">
+              <label class="payment-card d-flex align-items-center gap-3" id="payCod">
+                <input type="radio" name="payment_method" value="cod" hidden
+                       onchange="showPayFields('cod')"/>
+                <i class="fas fa-money-bill fa-lg text-muted"></i>
+                <div>
+                  <div class="fw-500 small">Cash on Delivery</div>
+                  <div class="text-muted" style="font-size:11px">Pay when delivered</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Card fields -->
+          <div id="cardFields">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Card Number</label>
+                <input type="text" class="form-control" name="card_number"
+                       placeholder="1234 5678 9012 3456" maxlength="19"
+                       oninput="formatCard(this)"/>
+              </div>
+              <div class="col-6">
+                <label class="form-label">Expiry Date</label>
+                <input type="text" class="form-control" placeholder="MM/YY" maxlength="5"
+                       oninput="formatExpiry(this)"/>
+              </div>
+              <div class="col-6">
+                <label class="form-label">CVV</label>
+                <input type="text" class="form-control" placeholder="123" maxlength="3"/>
+              </div>
+            </div>
+          </div>
+
+          <div id="ewalletFields" style="display:none" class="text-center p-4 text-muted">
+            <i class="fas fa-qrcode fa-3x mb-3"></i>
+            <div class="small">A QR code will be generated after placing your order.</div>
+          </div>
+          <div id="codFields" style="display:none" class="p-3 rounded" style="background:#fafafa">
+            <div class="small text-muted">Pay with cash when your order is delivered. Additional RM5 fee applies.</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Order Notes (Optional)</label>
+          <textarea class="form-control" name="notes" rows="2"
+                    placeholder="Any special instructions for your order..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-dark w-100 btn-lg">
+          <i class="fas fa-lock me-2"></i> Place Order — RM{{ "%.2f"|format(cart.discounted_total + (0 if cart.discounted_total >= 500 else 50)) }}
+        </button>
+        <p class="text-center text-muted small mt-2">
+          <i class="fas fa-shield-alt me-1"></i> Secured by 256-bit SSL encryption
+        </p>
+      </form>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="col-lg-5">
+      <div class="cart-summary">
+        <h5 class="fw-600 mb-4">Your Order</h5>
+        {% for item in cart.items %}
+        <div class="d-flex gap-3 mb-3 pb-3 border-bottom">
+          <img src="{{ item.image }}" style="width:60px;height:78px;object-fit:cover;border-radius:6px"
+               onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=120'"/>
+          <div class="flex-grow-1">
+            <div class="small fw-500">{{ item.name }}</div>
+            <div class="text-muted" style="font-size:11px">
+              {% if item.size %}{{ item.size }}{% endif %}
+              {% if item.color %} · {{ item.color }}{% endif %}
+              · Qty: {{ item.quantity }}
+            </div>
+          </div>
+          <div class="fw-600 small">RM{{ "%.2f"|format(item.subtotal) }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="summary-row">
+          <span class="text-muted">Subtotal</span>
+          <span>RM{{ "%.2f"|format(cart.total) }}</span>
+        </div>
+        {% if cart.discount > 0 %}
+        <div class="summary-row text-success">
+          <span>Discount ({{ cart.discount|int }}%)</span>
+          <span>−RM{{ "%.2f"|format(cart.total - cart.discounted_total) }}</span>
+        </div>
+        {% endif %}
+        <div class="summary-row">
+          <span class="text-muted">Shipping</span>
+          <span>{% if cart.discounted_total >= 500 %}Free{% else %}RM50.00{% endif %}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>RM{{ "%.2f"|format(cart.discounted_total + (0 if cart.discounted_total >= 500 else 50)) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showPayFields(type) {
+  ['card','ewallet','cod'].forEach(t => {
+    document.getElementById(t+'Fields').style.display = t === type ? 'block' : 'none';
+    document.getElementById('pay'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('selected', t === type);
+  });
+}
+function formatCard(el) {
+  let v = el.value.replace(/\D/g, '').substring(0, 16);
+  el.value = v.replace(/(.{4})/g, '$1 ').trim();
+}
+function formatExpiry(el) {
+  let v = el.value.replace(/\D/g, '');
+  if (v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2,4);
+  el.value = v;
+}
+document.querySelectorAll('.payment-card').forEach(card => {
+  card.addEventListener('click', function() {
+    document.querySelectorAll('.payment-card').forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+</script>
+{% endblock %}

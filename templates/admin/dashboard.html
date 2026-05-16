@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard — KSAH{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <div class="sidebar">
+    <div class="sidebar-brand">KSAH<span style="font-size:.7rem;letter-spacing:1px;opacity:.5;display:block;font-weight:400">Admin Panel</span></div>
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Overview</div>
+      <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link active">
+        <span class="icon"><i class="fas fa-th-large"></i></span> Dashboard
+      </a>
+      <div class="sidebar-section-label">Management</div>
+      <a href="{{ url_for('admin.users') }}" class="sidebar-link">
+        <span class="icon"><i class="fas fa-users"></i></span> Users
+      </a>
+      <a href="{{ url_for('admin.users', role='seller') }}" class="sidebar-link">
+        <span class="icon"><i class="fas fa-store"></i></span> Sellers
+      </a>
+      <a href="{{ url_for('admin.products') }}" class="sidebar-link">
+        <span class="icon"><i class="fas fa-box"></i></span> Products
+      </a>
+      <a href="{{ url_for('admin.orders') }}" class="sidebar-link">
+        <span class="icon"><i class="fas fa-shopping-bag"></i></span> Orders
+      </a>
+      <div class="sidebar-section-label">Account</div>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger">
+        <span class="icon"><i class="fas fa-sign-out-alt"></i></span> Logout
+      </a>
+    </nav>
+  </div>
+
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div class="dashboard-title">Platform Overview</div>
+      <div class="dashboard-subtitle">Real-time analytics and platform health</div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+          <div class="stat-value">{{ total_users }}</div>
+          <div class="stat-label">Total Customers</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-icon purple"><i class="fas fa-store"></i></div>
+          <div class="stat-value">{{ total_sellers }}</div>
+          <div class="stat-label">Active Sellers</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-shopping-bag"></i></div>
+          <div class="stat-value">{{ total_orders }}</div>
+          <div class="stat-label">Total Orders</div>
+          {% if pending_orders > 0 %}
+          <div class="stat-change down">{{ pending_orders }} pending</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-icon green"><i class="fas fa-dollar-sign"></i></div>
+          <div class="stat-value">RM{{ "%.0f"|format(total_revenue) }}</div>
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-change up">Platform total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary KPIs -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-icon gold"><i class="fas fa-box"></i></div>
+          <div class="stat-value">{{ total_products }}</div>
+          <div class="stat-label">Active Products</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fas fa-calculator"></i></div>
+          <div class="stat-value">RM{{ "%.0f"|format(avg_order) }}</div>
+          <div class="stat-label">Average Order Value</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+          <div class="stat-value">{{ pending_orders }}</div>
+          <div class="stat-label">Pending Orders</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Revenue Chart (Visual) -->
+    {% if monthly_data %}
+    <div class="chart-container mb-4">
+      <h6 class="fw-600 mb-4">Monthly Revenue</h6>
+      <div class="d-flex align-items-end gap-2" style="height:120px">
+        {% set max_rev = monthly_data | map(attribute='revenue') | max %}
+        {% for month in monthly_data %}
+        {% set height = ((month.revenue / max_rev) * 100) | int if max_rev > 0 else 10 %}
+        <div class="flex-grow-1 position-relative" style="height:100%">
+          <div style="position:absolute;bottom:0;left:0;right:0;height:{{ height }}%;background:linear-gradient(to top,#111,#555);border-radius:4px 4px 0 0;transition:.3s"
+               title="RM{{ '%.0f'|format(month.revenue) }}"></div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="d-flex justify-content-between mt-1" style="font-size:10px;color:#aaa">
+        {% for month in monthly_data %}
+        <div class="flex-grow-1 text-center">{{ month._id.month }}/{{ month._id.year % 100 }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Orders -->
+    {% if recent_orders %}
+    <div class="dashboard-table">
+      <div class="table-title">Recent Orders</div>
+      <table class="table">
+        <thead>
+          <tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td class="fw-600 small">{{ order.order_number }}</td>
+            <td class="small">{{ order.user_name }}</td>
+            <td class="fw-600 small">RM{{ "%.2f"|format(order.total) }}</td>
+            <td><span class="badge-status badge-{{ order.status }}">{{ order.status|title }}</span></td>
+            <td class="small text-muted">{{ order.created_at.strftime('%d %b %Y') if order.created_at else '-' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="p-3 text-center">
+        <a href="{{ url_for('admin.orders') }}" class="small text-muted">View all orders →</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mt-3">
+      <div class="col-md-3">
+        <a href="{{ url_for('admin.users') }}" class="d-block p-3 border rounded-lg text-center text-decoration-none">
+          <i class="fas fa-users fa-lg mb-2 text-accent"></i>
+          <div class="small fw-600">Manage Users</div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('admin.products') }}" class="d-block p-3 border rounded-lg text-center text-decoration-none">
+          <i class="fas fa-box fa-lg mb-2 text-accent"></i>
+          <div class="small fw-600">Products</div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('admin.orders') }}" class="d-block p-3 border rounded-lg text-center text-decoration-none">
+          <i class="fas fa-shopping-bag fa-lg mb-2 text-accent"></i>
+          <div class="small fw-600">Orders</div>
+        </a>
+      </div>
+      <div class="col-md-3">
+        <a href="{{ url_for('admin.users', role='seller') }}" class="d-block p-3 border rounded-lg text-center text-decoration-none">
+          <i class="fas fa-store fa-lg mb-2 text-accent"></i>
+          <div class="small fw-600">Sellers</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

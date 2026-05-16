@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}My Wishlist — KSAH{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1 class="mb-0">My Wishlist
+      {% if products %}
+      <span class="text-muted fw-400 small">({{ products|length }} item{% if products|length != 1 %}s{% endif %})</span>
+      {% endif %}
+    </h1>
+  </div>
+</div>
+
+<div class="container py-5">
+  {% if products %}
+  <div class="row g-3">
+    {% for product in products %}
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="product-card h-100">
+        <div class="product-image-wrapper">
+          <img src="{{ product.primary_image }}" alt="{{ product.name }}"
+               onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400'"/>
+          {% if product.discount_percent > 0 %}
+          <span class="product-badge sale">-{{ product.discount_percent }}%</span>
+          {% endif %}
+          <div class="product-actions" style="opacity:1;transform:none">
+            <form method="POST" action="{{ url_for('customer.toggle_wishlist') }}" class="m-0">
+              <input type="hidden" name="product_id" value="{{ product._id }}"/>
+              <button type="submit" class="action-btn wishlisted" title="Remove from wishlist">
+                <i class="fas fa-heart"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+        <div class="product-info">
+          <div class="product-brand">{{ product.brand }}</div>
+          <div class="product-name">{{ product.name }}</div>
+          <div class="product-price">
+            <span class="price-current">RM{{ "%.0f"|format(product.price) }}</span>
+            {% if product.original_price > product.price %}
+            <span class="price-original">RM{{ "%.0f"|format(product.original_price) }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <a href="{{ url_for('customer.product_detail', product_id=product._id) }}"
+           class="add-to-cart-btn text-center d-block">View Product</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="wishlist-empty">
+    <div style="font-size:4rem;color:#ddd;margin-bottom:20px"><i class="far fa-heart"></i></div>
+    <h4>Your wishlist is empty</h4>
+    <p class="text-muted">Save items you love to your wishlist.</p>
+    <a href="{{ url_for('customer.products') }}" class="btn btn-dark mt-2">Explore Products</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Shopping Cart — KSAH{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1 class="mb-0">Shopping Cart
+      {% if cart.item_count > 0 %}
+      <span class="text-muted fw-400 small">({{ cart.item_count }} item{% if cart.item_count != 1 %}s{% endif %})</span>
+      {% endif %}
+    </h1>
+  </div>
+</div>
+
+<div class="container py-5">
+  {% if cart.items %}
+  <div class="row g-4">
+    <!-- Cart Items -->
+    <div class="col-lg-8">
+      {% for item in cart.items %}
+      <div class="cart-item" id="item_{{ loop.index }}">
+        <img src="{{ item.image }}" alt="{{ item.name }}" class="cart-item-image"
+             onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=200'"/>
+        <div class="flex-grow-1">
+          <div class="d-flex justify-content-between align-items-start mb-1">
+            <div>
+              <div class="product-brand">{{ item.brand }}</div>
+              <div style="font-family:'Poppins',sans-serif;font-weight:500;font-size:15px">{{ item.name }}</div>
+              <div class="text-muted small mt-1">
+                {% if item.size %}Size: <strong>{{ item.size }}</strong>{% endif %}
+                {% if item.color %} · Color: <strong>{{ item.color }}</strong>{% endif %}
+              </div>
+            </div>
+            <form method="POST" action="{{ url_for('customer.remove_from_cart') }}" class="m-0">
+              <input type="hidden" name="product_id" value="{{ item.product_id }}"/>
+              <input type="hidden" name="size" value="{{ item.size }}"/>
+              <button type="submit" class="btn btn-sm text-muted border-0" title="Remove">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </form>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <!-- Qty control -->
+            <form method="POST" action="{{ url_for('customer.update_cart') }}" class="m-0">
+              <input type="hidden" name="product_id" value="{{ item.product_id }}"/>
+              <input type="hidden" name="size" value="{{ item.size }}"/>
+              <div class="qty-control">
+                <button type="submit" name="quantity" value="{{ [1, item.quantity - 1]|max }}"
+                        class="qty-btn">−</button>
+                <span class="qty-display">{{ item.quantity }}</span>
+                <button type="submit" name="quantity" value="{{ item.quantity + 1 }}"
+                        class="qty-btn">+</button>
+              </div>
+            </form>
+            <div style="font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600">
+              RM{{ "%.2f"|format(item.subtotal) }}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <!-- Promo code -->
+      <div class="mt-4 p-4 border rounded-lg">
+        <h6 class="fw-600 mb-3">Promo Code</h6>
+        <form method="POST" action="{{ url_for('customer.apply_promo') }}" class="d-flex gap-2">
+          <input type="text" class="form-control" name="code" placeholder="Enter code"
+                 value="{{ cart.promo_code }}" style="max-width:200px"/>
+          <button type="submit" class="btn btn-outline-dark px-4">Apply</button>
+        </form>
+        <div class="mt-2 small text-muted">Try: FASHION20, STYLE10, NEW15</div>
+        {% if cart.promo_code %}
+        <div class="mt-2 small text-success">
+          <i class="fas fa-check-circle me-1"></i> Promo "{{ cart.promo_code }}" applied — {{ cart.discount|int }}% off!
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="col-lg-4">
+      <div class="cart-summary">
+        <h5 class="fw-600 mb-4">Order Summary</h5>
+        <div class="summary-row">
+          <span class="text-muted">Subtotal</span>
+          <span>RM{{ "%.2f"|format(cart.total) }}</span>
+        </div>
+        {% if cart.discount > 0 %}
+        <div class="summary-row text-success">
+          <span>Discount ({{ cart.discount|int }}%)</span>
+          <span>−RM{{ "%.2f"|format(cart.total - cart.discounted_total) }}</span>
+        </div>
+        {% endif %}
+        <div class="summary-row">
+          <span class="text-muted">Shipping</span>
+          <span>{% if cart.discounted_total >= 500 %}<span class="text-success">Free</span>{% else %}RM50.00{% endif %}</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span>RM{{ "%.2f"|format(cart.discounted_total + (0 if cart.discounted_total >= 500 else 50)) }}</span>
+        </div>
+        {% if cart.discounted_total < 500 %}
+        <div class="mt-2 p-2 rounded small text-center" style="background:#fef9e7;color:#f39c12">
+          Add RM{{ "%.2f"|format(500 - cart.discounted_total) }} more for free shipping!
+        </div>
+        {% endif %}
+        <a href="{{ url_for('customer.checkout') }}" class="btn btn-dark w-100 btn-lg mt-4">
+          Proceed to Checkout <i class="fas fa-arrow-right ms-2"></i>
+        </a>
+        <a href="{{ url_for('customer.products') }}" class="btn btn-outline-dark w-100 mt-2">
+          Continue Shopping
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- Empty Cart -->
+  <div class="empty-cart">
+    <div class="empty-cart-icon"><i class="fas fa-shopping-bag"></i></div>
+    <h4>Your cart is empty</h4>
+    <p class="text-muted">Looks like you haven't added any items yet.</p>
+    <a href="{{ url_for('customer.products') }}" class="btn btn-dark mt-2">Start Shopping</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

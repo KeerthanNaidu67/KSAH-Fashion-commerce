@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Users — KSAH Admin{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <div class="sidebar">
+    <div class="sidebar-brand">KSAH<span style="font-size:.7rem;letter-spacing:1px;opacity:.5;display:block;font-weight:400">Admin Panel</span></div>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link"><span class="icon"><i class="fas fa-th-large"></i></span> Dashboard</a>
+      <a href="{{ url_for('admin.users') }}" class="sidebar-link {% if not role %}active{% endif %}"><span class="icon"><i class="fas fa-users"></i></span> Users</a>
+      <a href="{{ url_for('admin.users', role='seller') }}" class="sidebar-link {% if role=='seller' %}active{% endif %}"><span class="icon"><i class="fas fa-store"></i></span> Sellers</a>
+      <a href="{{ url_for('admin.products') }}" class="sidebar-link"><span class="icon"><i class="fas fa-box"></i></span> Products</a>
+      <a href="{{ url_for('admin.orders') }}" class="sidebar-link"><span class="icon"><i class="fas fa-shopping-bag"></i></span> Orders</a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger"><span class="icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+  </div>
+  <div class="dashboard-main">
+    <div class="dashboard-header d-flex justify-content-between align-items-center">
+      <div>
+        <div class="dashboard-title">{{ 'Sellers' if role == 'seller' else 'Users' }}</div>
+        <div class="dashboard-subtitle">{{ total }} total</div>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('admin.users') }}" class="btn btn-sm {% if not role %}btn-dark{% else %}btn-outline-dark{% endif %}">All</a>
+        <a href="{{ url_for('admin.users', role='customer') }}" class="btn btn-sm {% if role=='customer' %}btn-dark{% else %}btn-outline-dark{% endif %}">Customers</a>
+        <a href="{{ url_for('admin.users', role='seller') }}" class="btn btn-sm {% if role=='seller' %}btn-dark{% else %}btn-outline-dark{% endif %}">Sellers</a>
+      </div>
+    </div>
+
+    <div class="dashboard-table">
+      <table class="table">
+        <thead>
+          <tr><th>User</th><th>Email</th><th>Role</th><th>Phone</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="avatar-circle">{{ user.name[0].upper() }}</div>
+                <span class="small fw-500">{{ user.name }}</span>
+              </div>
+            </td>
+            <td class="small text-muted">{{ user.email }}</td>
+            <td>
+              <span class="badge-status {% if user.role=='admin' %}badge-processing{% elif user.role=='seller' %}badge-confirmed{% else %}badge-delivered{% endif %}">
+                {{ user.role|title }}
+              </span>
+            </td>
+            <td class="small text-muted">{{ user.phone or '—' }}</td>
+            <td>
+              <span class="badge-status {% if user.is_active %}badge-delivered{% else %}badge-cancelled{% endif %}">
+                {{ 'Active' if user.is_active else 'Suspended' }}
+              </span>
+            </td>
+            <td class="small text-muted">{{ user.created_at.strftime('%d %b %Y') if user.created_at else '—' }}</td>
+            <td>
+              {% if user.role != 'admin' %}
+              <form method="POST" action="{{ url_for('admin.toggle_user', user_id=user._id) }}">
+                <button type="submit" class="btn btn-sm {% if user.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                  {{ 'Suspend' if user.is_active else 'Activate' }}
+                </button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="text-center py-5 text-muted">No users found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

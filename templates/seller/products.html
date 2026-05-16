@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}My Products — KSAH Seller{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <div class="sidebar">
+    <div class="sidebar-brand">KSAH<span style="font-size:.7rem;letter-spacing:1px;opacity:.5;display:block;font-weight:400">Seller Portal</span></div>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('seller.dashboard') }}" class="sidebar-link"><span class="icon"><i class="fas fa-th-large"></i></span> Dashboard</a>
+      <a href="{{ url_for('seller.products') }}" class="sidebar-link active"><span class="icon"><i class="fas fa-box"></i></span> My Products</a>
+      <a href="{{ url_for('seller.add_product') }}" class="sidebar-link"><span class="icon"><i class="fas fa-plus-circle"></i></span> Add Product</a>
+      <a href="{{ url_for('seller.orders') }}" class="sidebar-link"><span class="icon"><i class="fas fa-shopping-bag"></i></span> Orders</a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger"><span class="icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+  </div>
+  <div class="dashboard-main">
+    <div class="dashboard-header d-flex justify-content-between align-items-center">
+      <div>
+        <div class="dashboard-title">My Products</div>
+        <div class="dashboard-subtitle">Manage your product listings</div>
+      </div>
+      <a href="{{ url_for('seller.add_product') }}" class="btn btn-dark">
+        <i class="fas fa-plus me-2"></i> Add Product
+      </a>
+    </div>
+
+    <div class="dashboard-table">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Status</th>
+            <th>Rating</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-3">
+                <img src="{{ product.primary_image }}" style="width:44px;height:56px;object-fit:cover;border-radius:6px"
+                     onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=80'"/>
+                <div>
+                  <div class="fw-500 small">{{ product.name }}</div>
+                  <div class="text-muted" style="font-size:11px">{{ product.brand }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="small text-muted">{{ product.category }}</td>
+            <td>
+              <div class="fw-600 small">RM{{ "%.0f"|format(product.price) }}</div>
+              {% if product.original_price > product.price %}
+              <div class="text-muted" style="font-size:11px;text-decoration:line-through">RM{{ "%.0f"|format(product.original_price) }}</div>
+              {% endif %}
+            </td>
+            <td>
+              <span class="{% if product.stock == 0 %}text-danger{% elif product.stock <= 5 %}text-warning{% else %}text-success{% endif %} fw-500 small">
+                {{ product.stock }} units
+              </span>
+            </td>
+            <td>
+              <span class="badge-status {% if product.is_active %}badge-delivered{% else %}badge-cancelled{% endif %}">
+                {{ 'Active' if product.is_active else 'Inactive' }}
+              </span>
+            </td>
+            <td class="small">
+              {% if product.rating > 0 %}
+              <span class="text-warning">★</span> {{ product.rating }} ({{ product.review_count }})
+              {% else %}
+              <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex gap-2">
+                <a href="{{ url_for('seller.edit_product', product_id=product._id) }}"
+                   class="btn btn-sm btn-outline-dark">Edit</a>
+                <form method="POST" action="{{ url_for('seller.delete_product', product_id=product._id) }}"
+                      onsubmit="return confirm('Delete this product?')">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" class="text-center py-5 text-muted">
+              No products yet. <a href="{{ url_for('seller.add_product') }}">Add your first product →</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

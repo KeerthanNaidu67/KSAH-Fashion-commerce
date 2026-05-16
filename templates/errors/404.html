@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found — KSAH{% endblock %}
+{% block content %}
+<div class="container py-5 text-center" style="min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center">
+  <div style="font-size:5rem;font-family:'Poppins',sans-serif;font-weight:700;color:#f0f0f0">404</div>
+  <h2 style="font-family:'Poppins',sans-serif;font-weight:600;margin-bottom:12px">Page Not Found</h2>
+  <p class="text-muted mb-4">The page you're looking for doesn't exist or has been moved.</p>
+  <div class="d-flex gap-3">
+    <a href="{{ url_for('customer.home') }}" class="btn btn-dark">Go Home</a>
+    <a href="{{ url_for('customer.products') }}" class="btn btn-outline-dark">Browse Products</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Orders — KSAH Seller{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <div class="sidebar">
+    <div class="sidebar-brand">KSAH<span style="font-size:.7rem;letter-spacing:1px;opacity:.5;display:block;font-weight:400">Seller Portal</span></div>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('seller.dashboard') }}" class="sidebar-link"><span class="icon"><i class="fas fa-th-large"></i></span> Dashboard</a>
+      <a href="{{ url_for('seller.products') }}" class="sidebar-link"><span class="icon"><i class="fas fa-box"></i></span> My Products</a>
+      <a href="{{ url_for('seller.add_product') }}" class="sidebar-link"><span class="icon"><i class="fas fa-plus-circle"></i></span> Add Product</a>
+      <a href="{{ url_for('seller.orders') }}" class="sidebar-link active"><span class="icon"><i class="fas fa-shopping-bag"></i></span> Orders</a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger"><span class="icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+  </div>
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div class="dashboard-title">Orders</div>
+      <div class="dashboard-subtitle">{{ orders|length }} total orders</div>
+    </div>
+    <div class="dashboard-table">
+      <table class="table">
+        <thead>
+          <tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+          <tr>
+            <td class="fw-600 small">{{ order.order_number }}</td>
+            <td>
+              <div class="small fw-500">{{ order.user_name }}</div>
+              <div class="text-muted" style="font-size:11px">{{ order.user_email }}</div>
+            </td>
+            <td class="small text-muted">{{ order.items|length }} items</td>
+            <td class="fw-600 small">RM{{ "%.2f"|format(order.total) }}</td>
+            <td><span class="badge-status badge-{{ order.status }}">{{ order.status|title }}</span></td>
+            <td class="small text-muted">{{ order.created_at.strftime('%d %b %Y') if order.created_at else '-' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="text-center py-5 text-muted">No orders yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

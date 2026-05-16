@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% block title %}KSAH — Modern Fashion Store{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ─────────────────────────────────────────────────────── -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6" data-aos="fade-right">
+        <div class="hero-badge">New Collection 2026</div>
+        <h1 class="hero-title">
+          Dress for the<br>
+          <span class="accent">Life You Want</span>
+        </h1>
+        <p class="hero-subtitle">
+          Discover timeless pieces crafted for the modern wardrobe. Premium quality, effortless style.
+        </p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="{{ url_for('customer.products') }}" class="btn btn-dark btn-lg">
+            Shop Now <i class="fas fa-arrow-right ms-2"></i>
+          </a>
+          <a href="{{ url_for('customer.products', category='Sale') }}" class="btn btn-outline-dark btn-lg">
+            View Sale
+          </a>
+        </div>
+        <div class="d-flex gap-4 mt-4 pt-2">
+          <div>
+            <div class="fw-700" style="font-size:1.3rem;font-family:'Poppins',sans-serif">500+</div>
+            <div class="text-muted small">Brands</div>
+          </div>
+          <div style="border-left:1px solid #eee;padding-left:20px">
+            <div class="fw-700" style="font-size:1.3rem;font-family:'Poppins',sans-serif">10K+</div>
+            <div class="text-muted small">Products</div>
+          </div>
+          <div style="border-left:1px solid #eee;padding-left:20px">
+            <div class="fw-700" style="font-size:1.3rem;font-family:'Poppins',sans-serif">4.9★</div>
+            <div class="text-muted small">Rating</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 position-relative d-none d-lg-block">
+        <div class="hero-image-wrapper">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800" alt="Fashion Hero"/>
+          <div class="hero-float-card bottom-left">
+            <div class="d-flex align-items-center gap-3">
+              <div style="width:40px;height:40px;background:#f5f5f5;border-radius:8px;overflow:hidden">
+                <img src="https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=80" style="width:100%;height:100%;object-fit:cover"/>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:600">New Arrival</div>
+                <div style="font-size:11px;color:#888">Floral Midi Dress</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-float-card top-right">
+            <div style="font-size:11px;color:#888;margin-bottom:2px">Customer Rating</div>
+            <div style="color:#f59e0b;font-size:14px">★★★★★</div>
+            <div style="font-size:11px;font-weight:600">4.9 / 5.0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── USP Bar ───────────────────────────────────────────────────── -->
+<div style="background:#111;color:white;padding:14px 0">
+  <div class="container">
+    <div class="row text-center g-2">
+      <div class="col-6 col-md-3">
+        <i class="fas fa-shipping-fast me-2 text-accent"></i>
+        <span class="small">Free Shipping over RM500</span>
+      </div>
+      <div class="col-6 col-md-3">
+        <i class="fas fa-undo me-2 text-accent"></i>
+        <span class="small">30-Day Easy Returns</span>
+      </div>
+      <div class="col-6 col-md-3">
+        <i class="fas fa-shield-alt me-2 text-accent"></i>
+        <span class="small">Secure Payments</span>
+      </div>
+      <div class="col-6 col-md-3">
+        <i class="fas fa-headset me-2 text-accent"></i>
+        <span class="small">24/7 Customer Support</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Categories ───────────────────────────────────────────────── -->
+<section class="section-pad">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-label">Browse</div>
+      <h2 class="section-title">Shop by Category</h2>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <a href="{{ url_for('customer.products', category='Women') }}" class="category-card d-block">
+          <img src="https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=600" alt="Women"/>
+          <div class="category-overlay">
+            <div>
+              <div class="category-label">Women</div>
+              <div class="category-sub">New arrivals →</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4">
+        <a href="{{ url_for('customer.products', category='Men') }}" class="category-card d-block">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600" alt="Men"/>
+          <div class="category-overlay">
+            <div>
+              <div class="category-label">Men</div>
+              <div class="category-sub">Explore styles →</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-4 d-flex flex-column gap-3">
+        <a href="{{ url_for('customer.products', category='Accessories') }}" class="category-card d-block" style="flex:1">
+          <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600" alt="Accessories" style="height:150px"/>
+          <div class="category-overlay">
+            <div><div class="category-label">Accessories</div></div>
+          </div>
+        </a>
+        <a href="{{ url_for('customer.products', category='Sale') }}" class="category-card d-block" style="flex:1">
+          <img src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=600" alt="Sale" style="height:150px"/>
+          <div class="category-overlay" style="background:linear-gradient(to top,rgba(231,76,60,0.7) 0%,transparent 60%)">
+            <div><div class="category-label">Sale — Up to 70% Off</div></div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Featured Products ─────────────────────────────────────────── -->
+<section class="section-pad" style="background:#fafafa;padding-top:0">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-5">
+      <div>
+        <div class="section-label">Trending</div>
+        <h2 class="section-title">Featured Collection</h2>
+      </div>
+      <a href="{{ url_for('customer.products') }}" class="btn btn-outline-dark">View All</a>
+    </div>
+    <div class="row g-3">
+      {% for product in featured %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="product-card h-100">
+          <div class="product-image-wrapper">
+            <img src="{{ product.primary_image }}" alt="{{ product.name }}"
+                 onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400'"/>
+            {% if product.discount_percent > 0 %}
+            <span class="product-badge sale">-{{ product.discount_percent }}%</span>
+            {% endif %}
+            <div class="product-actions">
+              {% if current_user.is_authenticated %}
+              <form method="POST" action="{{ url_for('customer.toggle_wishlist') }}" class="m-0">
+                <input type="hidden" name="product_id" value="{{ product._id }}"/>
+                <button type="submit" class="action-btn" title="Wishlist"><i class="far fa-heart"></i></button>
+              </form>
+              {% endif %}
+              <a href="{{ url_for('customer.product_detail', product_id=product._id) }}" class="action-btn" title="Quick view">
+                <i class="fas fa-eye"></i>
+              </a>
+            </div>
+          </div>
+          <div class="product-info">
+            <div class="product-brand">{{ product.brand }}</div>
+            <div class="product-name">{{ product.name }}</div>
+            {% if product.rating > 0 %}
+            <div class="star-rating mb-2">
+              {% for i in range(5) %}
+                <i class="fa{% if i < product.rating|int %}s{% else %}r{% endif %} fa-star"></i>
+              {% endfor %}
+              <span class="count">({{ product.review_count }})</span>
+            </div>
+            {% endif %}
+            <div class="product-price">
+              <span class="price-current">RM{{ "%.0f"|format(product.price) }}</span>
+              {% if product.original_price > product.price %}
+              <span class="price-original">RM{{ "%.0f"|format(product.original_price) }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <a href="{{ url_for('customer.product_detail', product_id=product._id) }}"
+             class="add-to-cart-btn text-center d-block">View Product</a>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12 text-center text-muted py-5">No products available yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Promo Banner ─────────────────────────────────────────────── -->
+<section class="container mb-5">
+  <div class="promo-banner">
+    <div class="row align-items-center">
+      <div class="col-md-7">
+        <div class="hero-badge" style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9)">
+          Limited Time Offer
+        </div>
+        <h2 style="font-family:'Poppins',sans-serif;font-size:2rem;font-weight:700;color:white;margin:12px 0">
+          End of Season Sale<br>Up to <span style="color:var(--accent)">70% Off</span>
+        </h2>
+        <p style="color:rgba(255,255,255,0.7);margin-bottom:24px">
+          Shop the finest fashion at unbeatable prices. Offer ends soon.
+        </p>
+        <a href="{{ url_for('customer.products', category='Sale') }}" class="btn btn-accent btn-lg">
+          Shop Sale <i class="fas fa-arrow-right ms-2"></i>
+        </a>
+      </div>
+      <div class="col-md-5 d-none d-md-block text-end position-relative" style="z-index:1">
+        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=500"
+             style="height:280px;object-fit:cover;border-radius:12px;opacity:.9" alt="Sale"/>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Women Section ────────────────────────────────────────────── -->
+{% if women %}
+<section class="section-pad">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <div class="section-label">Women's</div>
+        <h2 class="section-title">For Her</h2>
+      </div>
+      <a href="{{ url_for('customer.products', category='Women') }}" class="btn btn-outline-dark">All Women's</a>
+    </div>
+    <div class="row g-3">
+      {% for product in women %}
+      <div class="col-6 col-md-3">
+        <div class="product-card">
+          <div class="product-image-wrapper">
+            <img src="{{ product.primary_image }}" alt="{{ product.name }}"
+                 onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=400'"/>
+            <div class="product-actions">
+              <a href="{{ url_for('customer.product_detail', product_id=product._id) }}" class="action-btn">
+                <i class="fas fa-eye"></i>
+              </a>
+            </div>
+          </div>
+          <div class="product-info">
+            <div class="product-brand">{{ product.brand }}</div>
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-price">
+              <span class="price-current">RM{{ "%.0f"|format(product.price) }}</span>
+              {% if product.original_price > product.price %}
+              <span class="price-original">RM{{ "%.0f"|format(product.original_price) }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── Newsletter ────────────────────────────────────────────────── -->
+<section style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);padding:60px 0;margin-top:40px">
+  <div class="container text-center">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="section-label" style="color:var(--accent)">Newsletter</div>
+        <h2 style="font-family:'Poppins',sans-serif;color:white;margin-bottom:12px">
+          Stay in Style
+        </h2>
+        <p style="color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:28px">
+          Get the latest fashion news, exclusive deals, and new arrivals delivered weekly.
+        </p>
+        <form class="d-flex gap-2 justify-content-center flex-wrap">
+          <input type="email" class="form-control" placeholder="Enter your email" style="max-width:280px"/>
+          <button class="btn btn-accent px-4">Subscribe</button>
+        </form>
+        <p class="mt-3" style="color:rgba(255,255,255,0.4);font-size:12px">
+          No spam. Unsubscribe anytime.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Navbar scroll effect
+window.addEventListener('scroll', () => {
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 30);
+});
+</script>
+{% endblock %}

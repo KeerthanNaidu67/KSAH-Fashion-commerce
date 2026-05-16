@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — KSAH{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Breadcrumb -->
+  <nav class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('customer.home') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('customer.products', category=product.category) }}">{{ product.category }}</a></li>
+      <li class="breadcrumb-item active">{{ product.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-5">
+    <!-- ── Gallery ─────────────────────────────────────────────── -->
+    <div class="col-lg-6">
+      <div class="product-gallery-main mb-3" id="mainImage">
+        <img src="{{ product.primary_image }}" alt="{{ product.name }}" id="mainImg"
+             onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600'"/>
+      </div>
+      {% if product.images|length > 1 %}
+      <div class="row g-2">
+        {% for img in product.images %}
+        <div class="col-3">
+          <div class="product-thumb {% if loop.first %}active{% endif %}" onclick="setImage('{{ img }}', this)">
+            <img src="{{ img }}" alt="{{ product.name }}"/>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ── Product Info ────────────────────────────────────────── -->
+    <div class="col-lg-6">
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <span class="product-brand">{{ product.brand }}</span>
+        {% if not product.in_stock %}
+        <span class="badge-status badge-cancelled">Out of Stock</span>
+        {% else %}
+        <span class="badge-status badge-confirmed" style="background:#eafaf1;color:#27ae60">In Stock</span>
+        {% endif %}
+      </div>
+
+      <h1 style="font-family:'Poppins',sans-serif;font-size:1.6rem;font-weight:700;margin-bottom:12px">
+        {{ product.name }}
+      </h1>
+
+      <!-- Rating -->
+      {% if avg_rating > 0 %}
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="star-rating">
+          {% for i in range(5) %}
+          <i class="fa{% if i < avg_rating|int %}s{% elif (avg_rating - i) >= 0.5 %}s{% else %}r{% endif %} fa-star"></i>
+          {% endfor %}
+        </div>
+        <span class="small text-muted">{{ avg_rating }} ({{ review_count }} review{% if review_count != 1 %}s{% endif %})</span>
+      </div>
+      {% endif %}
+
+      <!-- Price -->
+      <div class="d-flex align-items-center gap-3 mb-4">
+        <span style="font-family:'Poppins',sans-serif;font-size:1.8rem;font-weight:700">
+          RM{{ "%.0f"|format(product.price) }}
+        </span>
+        {% if product.original_price > product.price %}
+        <span class="price-original" style="font-size:1.1rem">RM{{ "%.0f"|format(product.original_price) }}</span>
+        <span class="price-discount" style="font-size:13px">{{ product.discount_percent }}% OFF</span>
+        {% endif %}
+      </div>
+
+      <p class="text-muted" style="font-size:14px;line-height:1.7;margin-bottom:24px">
+        {{ product.description }}
+      </p>
+
+      <!-- Add to Cart Form -->
+      {% if product.in_stock %}
+      <form method="POST" action="{{ url_for('customer.add_to_cart') }}" id="addToCartForm">
+        <input type="hidden" name="product_id" value="{{ product._id }}"/>
+
+        <!-- Size selector -->
+        {% if product.sizes %}
+        <div class="mb-4">
+          <div class="d-flex justify-content-between mb-2">
+            <span style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Size</span>
+            <a href="#" class="small text-muted">Size Guide</a>
+          </div>
+          <div class="size-selector d-flex flex-wrap gap-2">
+            {% for sz in product.sizes %}
+            <label class="size-opt" for="size_{{ sz }}">
+              <input type="radio" name="size" value="{{ sz }}" id="size_{{ sz }}"
+                     hidden required onchange="this.closest('.size-selector').querySelectorAll('.size-opt').forEach(e=>e.classList.remove('selected'));this.parentElement.classList.add('selected')"/>
+              {{ sz }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Color selector -->
+        {% if product.colors %}
+        <div class="mb-4">
+          <span style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Color</span>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            {% for color in product.colors %}
+            <label style="cursor:pointer">
+              <input type="radio" name="color" value="{{ color }}" hidden
+                     {% if loop.first %}checked{% endif %}/>
+              <span class="badge bg-light text-dark border" style="font-size:12px;padding:6px 12px">{{ color }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Quantity -->
+        <div class="mb-4">
+          <span style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Quantity</span>
+          <div class="qty-control mt-2">
+            <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}"
+                   class="qty-display" id="qtyInput" readonly/>
+            <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+          <div class="text-muted small mt-1">{{ product.stock }} in stock</div>
+        </div>
+
+        <div class="d-flex gap-3">
+          <button type="submit" class="btn btn-dark btn-lg flex-grow-1">
+            <i class="fas fa-shopping-bag me-2"></i> Add to Cart
+          </button>
+          {% if current_user.is_authenticated %}
+          <form method="POST" action="{{ url_for('customer.toggle_wishlist') }}" class="m-0">
+            <input type="hidden" name="product_id" value="{{ product._id }}"/>
+            <button type="submit" class="btn btn-outline-dark btn-lg"
+                    title="{{ 'Remove from Wishlist' if in_wishlist else 'Add to Wishlist' }}">
+              <i class="fa{% if in_wishlist %}s text-danger{% else %}r{% endif %} fa-heart"></i>
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </form>
+      {% else %}
+      <div class="alert" style="background:#fdedec;border:none;border-radius:8px;color:#e74c3c">
+        <i class="fas fa-exclamation-circle me-2"></i> This product is currently out of stock.
+      </div>
+      {% endif %}
+
+      <!-- Product Meta -->
+      <div class="mt-4 pt-4 border-top">
+        <div class="d-flex flex-column gap-2 small text-muted">
+          <div><i class="fas fa-tag me-2"></i> Category: <strong>{{ product.category }}</strong></div>
+          <div><i class="fas fa-store me-2"></i> Sold by: <strong>{{ product.seller_name }}</strong></div>
+          {% if product.tags %}
+          <div><i class="fas fa-hashtag me-2"></i> Tags: {{ product.tags | join(', ') }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Delivery info -->
+      <div class="row g-3 mt-3">
+        <div class="col-4 text-center p-3 rounded" style="background:#fafafa">
+          <i class="fas fa-shipping-fast text-accent mb-1"></i>
+          <div class="small">Free Delivery<br><span class="text-muted" style="font-size:11px">Orders >RM500</span></div>
+        </div>
+        <div class="col-4 text-center p-3 rounded" style="background:#fafafa">
+          <i class="fas fa-undo text-accent mb-1"></i>
+          <div class="small">Easy Returns<br><span class="text-muted" style="font-size:11px">30 days</span></div>
+        </div>
+        <div class="col-4 text-center p-3 rounded" style="background:#fafafa">
+          <i class="fas fa-shield-alt text-accent mb-1"></i>
+          <div class="small">Secure Pay<br><span class="text-muted" style="font-size:11px">100% safe</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Reviews ──────────────────────────────────────────────── -->
+  <div class="row g-5 mt-2">
+    <div class="col-lg-8">
+      <h3 style="font-family:'Poppins',sans-serif;font-size:1.2rem;margin-bottom:24px">
+        Customer Reviews
+        {% if review_count > 0 %}<span class="text-muted small fw-normal ms-2">({{ review_count }})</span>{% endif %}
+      </h3>
+
+      {% if reviews %}
+      {% for review in reviews %}
+      <div class="mb-4 pb-4 {% if not loop.last %}border-bottom{% endif %}">
+        <div class="d-flex align-items-start gap-3">
+          <div class="avatar-circle flex-shrink-0">{{ review.user_name[0].upper() }}</div>
+          <div class="flex-grow-1">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <strong style="font-size:14px">{{ review.user_name }}</strong>
+              <span class="text-muted small">{{ review.created_at.strftime('%b %d, %Y') if review.created_at else '' }}</span>
+            </div>
+            <div class="star-rating mb-1">
+              {% for i in range(5) %}
+              <i class="fa{% if i < review.rating %}s{% else %}r{% endif %} fa-star"></i>
+              {% endfor %}
+            </div>
+            {% if review.title %}<div class="fw-600 small mb-1">{{ review.title }}</div>{% endif %}
+            <p class="text-muted small mb-0">{{ review.comment }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+      {% endif %}
+
+      <!-- Submit Review -->
+      {% if current_user.is_authenticated and current_user.role == 'customer' %}
+      <div class="mt-4 p-4 border rounded-lg">
+        <h5 style="font-family:'Poppins',sans-serif;margin-bottom:16px">Write a Review</h5>
+        <form method="POST" action="{{ url_for('customer.submit_review', product_id=product._id) }}">
+          <div class="mb-3">
+            <label class="form-label">Rating</label>
+            <div class="review-stars">
+              {% for i in range(5,0,-1) %}
+              <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}"/>
+              <label for="star{{ i }}"><i class="fas fa-star"></i></label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" class="form-control" name="title" placeholder="Summarize your review"/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Your Review</label>
+            <textarea class="form-control" name="comment" rows="3"
+                      placeholder="Share your experience with this product..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-dark">Submit Review</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── Related Products ─────────────────────────────────────── -->
+  {% if related %}
+  <div class="mt-5 pt-4 border-top">
+    <h3 style="font-family:'Poppins',sans-serif;font-size:1.2rem;margin-bottom:24px">You May Also Like</h3>
+    <div class="row g-3">
+      {% for p in related %}
+      <div class="col-6 col-md-3">
+        <a href="{{ url_for('customer.product_detail', product_id=p._id) }}" class="text-decoration-none">
+          <div class="product-card">
+            <div class="product-image-wrapper">
+              <img src="{{ p.primary_image }}" alt="{{ p.name }}"
+                   onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400'"/>
+            </div>
+            <div class="product-info">
+              <div class="product-brand">{{ p.brand }}</div>
+              <div class="product-name">{{ p.name }}</div>
+              <div class="price-current">RM{{ "%.0f"|format(p.price) }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function setImage(src, el) {
+  document.getElementById('mainImg').src = src;
+  document.querySelectorAll('.product-thumb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function changeQty(delta) {
+  const inp = document.getElementById('qtyInput');
+  const max = parseInt(inp.max);
+  const newVal = Math.min(max, Math.max(1, parseInt(inp.value) + delta));
+  inp.value = newVal;
+}
+</script>
+{% endblock %}

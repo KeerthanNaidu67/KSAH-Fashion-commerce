@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block title %}
+  {% if filters.get('category') %}{{ filters.category }} — {% endif %}
+  {% if filters.get('search') %}Search: {{ filters.search }} — {% endif %}
+  Products — KSAH
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-2">
+        <li class="breadcrumb-item"><a href="{{ url_for('customer.home') }}">Home</a></li>
+        <li class="breadcrumb-item active">
+          {% if filters.get('category') %}{{ filters.category }}{% elif filters.get('search') %}Search{% else %}All Products{% endif %}
+        </li>
+      </ol>
+    </nav>
+    <div class="d-flex justify-content-between align-items-center">
+      <h1 class="mb-0">
+        {% if filters.get('search') %}Results for "{{ filters.search }}"
+        {% elif filters.get('category') %}{{ filters.category }}
+        {% else %}All Products{% endif %}
+      </h1>
+      <span class="text-muted small">{{ total }} item{% if total != 1 %}s{% endif %}</span>
+    </div>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4">
+
+    <!-- ── Filter Sidebar ─────────────────────────────────────── -->
+    <div class="col-lg-3 d-none d-lg-block">
+      <div class="filter-sidebar">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h6 class="mb-0 fw-600">Filters</h6>
+          <a href="{{ url_for('customer.products') }}" class="small text-muted">Clear all</a>
+        </div>
+        <form id="filterForm" method="GET">
+          {% if filters.get('search') %}
+          <input type="hidden" name="q" value="{{ filters.search }}"/>
+          {% endif %}
+
+          <!-- Category -->
+          <div class="mb-4">
+            <div class="filter-section-title">Category</div>
+            {% for cat in categories %}
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="category" value="{{ cat }}"
+                     id="cat_{{ cat }}" {% if filters.get('category') == cat %}checked{% endif %}
+                     onchange="document.getElementById('filterForm').submit()"/>
+              <label class="form-check-label small" for="cat_{{ cat }}">{{ cat }}</label>
+            </div>
+            {% endfor %}
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="radio" name="category" value=""
+                     id="cat_all" {% if not filters.get('category') %}checked{% endif %}
+                     onchange="document.getElementById('filterForm').submit()"/>
+              <label class="form-check-label small" for="cat_all">All Categories</label>
+            </div>
+          </div>
+
+          <!-- Price Range -->
+          <div class="mb-4">
+            <div class="filter-section-title">Price Range</div>
+            <div class="d-flex gap-2 align-items-center">
+              <input type="number" class="form-control form-control-sm" name="min_price"
+                     placeholder="Min" value="{{ filters.get('min_price','') }}" min="0"/>
+              <span class="text-muted">—</span>
+              <input type="number" class="form-control form-control-sm" name="max_price"
+                     placeholder="Max" value="{{ filters.get('max_price','') }}" min="0"/>
+            </div>
+          </div>
+
+          <!-- Size -->
+          <div class="mb-4">
+            <div class="filter-section-title">Size</div>
+            <div class="d-flex flex-wrap gap-2">
+              {% for sz in sizes %}
+              <label class="size-btn {% if sz in filters.get('size',[]) %}active{% endif %}">
+                <input type="checkbox" name="size" value="{{ sz }}" hidden
+                       {% if sz in filters.get('size',[]) %}checked{% endif %}/> {{ sz }}
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-dark w-100 btn-sm">Apply Filters</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Product Grid ────────────────────────────────────────── -->
+    <div class="col-lg-9">
+      <!-- Sort Bar -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex gap-2 flex-wrap">
+          {% for cat in categories %}
+          <a href="{{ url_for('customer.products', category=cat) }}"
+             class="btn btn-sm {% if filters.get('category') == cat %}btn-dark{% else %}btn-outline-dark{% endif %}">
+            {{ cat }}
+          </a>
+          {% endfor %}
+        </div>
+        <select class="form-select form-select-sm" style="width:auto"
+                onchange="window.location=this.value">
+          <option value="{{ url_for('customer.products', **dict(request.args, sort='newest')) }}"
+                  {% if sort_by=='newest' %}selected{% endif %}>Newest</option>
+          <option value="{{ url_for('customer.products', **dict(request.args, sort='price_asc')) }}"
+                  {% if sort_by=='price_asc' %}selected{% endif %}>Price: Low to High</option>
+          <option value="{{ url_for('customer.products', **dict(request.args, sort='price_desc')) }}"
+                  {% if sort_by=='price_desc' %}selected{% endif %}>Price: High to Low</option>
+          <option value="{{ url_for('customer.products', **dict(request.args, sort='rating')) }}"
+                  {% if sort_by=='rating' %}selected{% endif %}>Top Rated</option>
+        </select>
+      </div>
+
+      {% if products %}
+      <div class="row g-3">
+        {% for product in products %}
+        <div class="col-6 col-md-4">
+          <div class="product-card h-100">
+            <div class="product-image-wrapper">
+              <img src="{{ product.primary_image }}" alt="{{ product.name }}"
+                   loading="lazy"
+                   onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400'"/>
+              {% if product.discount_percent > 0 %}
+              <span class="product-badge sale">-{{ product.discount_percent }}%</span>
+              {% endif %}
+              {% if not product.in_stock %}
+              <div style="position:absolute;inset:0;background:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center">
+                <span class="badge-status badge-cancelled">Out of Stock</span>
+              </div>
+              {% endif %}
+              <div class="product-actions">
+                {% if current_user.is_authenticated %}
+                <form method="POST" action="{{ url_for('customer.toggle_wishlist') }}" class="m-0">
+                  <input type="hidden" name="product_id" value="{{ product._id }}"/>
+                  <button type="submit" class="action-btn"><i class="far fa-heart"></i></button>
+                </form>
+                {% endif %}
+                <a href="{{ url_for('customer.product_detail', product_id=product._id) }}"
+                   class="action-btn"><i class="fas fa-eye"></i></a>
+              </div>
+            </div>
+            <div class="product-info flex-grow-1">
+              <div class="product-brand">{{ product.brand }}</div>
+              <div class="product-name">{{ product.name }}</div>
+              {% if product.rating > 0 %}
+              <div class="star-rating mb-1">
+                {% for i in range(5) %}
+                  <i class="fa{% if i < product.rating|int %}s{% else %}r{% endif %} fa-star"></i>
+                {% endfor %}
+                <span class="count">({{ product.review_count }})</span>
+              </div>
+              {% endif %}
+              <div class="product-price">
+                <span class="price-current">RM{{ "%.0f"|format(product.price) }}</span>
+                {% if product.original_price > product.price %}
+                <span class="price-original">RM{{ "%.0f"|format(product.original_price) }}</span>
+                <span class="price-discount">-{{ product.discount_percent }}%</span>
+                {% endif %}
+              </div>
+            </div>
+            {% if product.in_stock %}
+            <a href="{{ url_for('customer.product_detail', product_id=product._id) }}"
+               class="add-to-cart-btn text-center d-block">View Product</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if total_pages > 1 %}
+      <nav class="mt-5 d-flex justify-content-center">
+        <ul class="pagination">
+          {% if page > 1 %}
+          <li class="page-item">
+            <a class="page-link" href="?{{ request.query_string.decode() | replace('page='+page|string, 'page='+(page-1)|string) }}">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          </li>
+          {% endif %}
+          {% for p in range(1, total_pages+1) %}
+          <li class="page-item {% if p == page %}active{% endif %}">
+            <a class="page-link" href="?{{ request.query_string.decode() | replace('page='+page|string, 'page='+p|string) if 'page=' in request.query_string.decode() else request.query_string.decode() + '&page=' + p|string }}">{{ p }}</a>
+          </li>
+          {% endfor %}
+          {% if page < total_pages %}
+          <li class="page-item">
+            <a class="page-link" href="?{{ request.query_string.decode() | replace('page='+page|string, 'page='+(page+1)|string) }}">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="text-center py-5">
+        <div style="font-size:3rem;margin-bottom:16px">🔍</div>
+        <h5>No products found</h5>
+        <p class="text-muted">Try adjusting your filters or search terms.</p>
+        <a href="{{ url_for('customer.products') }}" class="btn btn-dark">Browse All</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

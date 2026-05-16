@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Products — KSAH Admin{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <div class="sidebar">
+    <div class="sidebar-brand">KSAH<span style="font-size:.7rem;letter-spacing:1px;opacity:.5;display:block;font-weight:400">Admin Panel</span></div>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link"><span class="icon"><i class="fas fa-th-large"></i></span> Dashboard</a>
+      <a href="{{ url_for('admin.users') }}" class="sidebar-link"><span class="icon"><i class="fas fa-users"></i></span> Users</a>
+      <a href="{{ url_for('admin.products') }}" class="sidebar-link active"><span class="icon"><i class="fas fa-box"></i></span> Products</a>
+      <a href="{{ url_for('admin.orders') }}" class="sidebar-link"><span class="icon"><i class="fas fa-shopping-bag"></i></span> Orders</a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger"><span class="icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+  </div>
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div class="dashboard-title">All Products</div>
+      <div class="dashboard-subtitle">{{ total }} total products</div>
+    </div>
+    <div class="dashboard-table">
+      <table class="table">
+        <thead>
+          <tr><th>Product</th><th>Seller</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Rating</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          {% for product in products %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <img src="{{ product.primary_image }}" style="width:40px;height:52px;object-fit:cover;border-radius:4px"
+                     onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=80'"/>
+                <div>
+                  <div class="small fw-500">{{ product.name }}</div>
+                  <div class="text-muted" style="font-size:11px">{{ product.brand }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="small text-muted">{{ product.seller_name }}</td>
+            <td class="small">{{ product.category }}</td>
+            <td class="fw-600 small">RM{{ "%.0f"|format(product.price) }}</td>
+            <td class="small {% if product.stock == 0 %}text-danger{% elif product.stock <= 5 %}text-warning{% endif %}">{{ product.stock }}</td>
+            <td><span class="badge-status {% if product.is_active %}badge-delivered{% else %}badge-cancelled{% endif %}">{{ 'Active' if product.is_active else 'Hidden' }}</span></td>
+            <td class="small">{% if product.rating > 0 %}★ {{ product.rating }}{% else %}—{% endif %}</td>
+            <td>
+              <form method="POST" action="{{ url_for('admin.toggle_product', product_id=product._id) }}">
+                <button type="submit" class="btn btn-sm {% if product.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}">
+                  {{ 'Hide' if product.is_active else 'Show' }}
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="8" class="text-center py-5 text-muted">No products found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

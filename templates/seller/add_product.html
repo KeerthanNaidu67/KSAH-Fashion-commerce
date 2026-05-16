@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Add Product — KSAH Seller{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <div class="sidebar">
+    <div class="sidebar-brand">KSAH<span style="font-size:.7rem;letter-spacing:1px;opacity:.5;display:block;font-weight:400">Seller Portal</span></div>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('seller.dashboard') }}" class="sidebar-link"><span class="icon"><i class="fas fa-th-large"></i></span> Dashboard</a>
+      <a href="{{ url_for('seller.products') }}" class="sidebar-link"><span class="icon"><i class="fas fa-box"></i></span> My Products</a>
+      <a href="{{ url_for('seller.add_product') }}" class="sidebar-link active"><span class="icon"><i class="fas fa-plus-circle"></i></span> Add Product</a>
+      <a href="{{ url_for('seller.orders') }}" class="sidebar-link"><span class="icon"><i class="fas fa-shopping-bag"></i></span> Orders</a>
+      <a href="{{ url_for('auth.logout') }}" class="sidebar-link text-danger"><span class="icon"><i class="fas fa-sign-out-alt"></i></span> Logout</a>
+    </nav>
+  </div>
+  <div class="dashboard-main">
+    <div class="dashboard-header">
+      <div class="dashboard-title">Add New Product</div>
+      <div class="dashboard-subtitle">Fill in the details to list your product</div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="p-4 border rounded-lg mb-4">
+            <h5 class="fw-600 mb-4">Basic Information</h5>
+            <div class="mb-3">
+              <label class="form-label">Product Name *</label>
+              <input type="text" class="form-control" name="name" required
+                     placeholder="e.g. Classic White Oxford Shirt"/>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea class="form-control" name="description" rows="4"
+                        placeholder="Describe your product in detail..."></textarea>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Brand *</label>
+                <input type="text" class="form-control" name="brand" required placeholder="e.g. Zara"/>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Category *</label>
+                <select class="form-control" name="category" required>
+                  <option value="">Select category</option>
+                  {% for cat in categories %}
+                  <option value="{{ cat }}">{{ cat }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 border rounded-lg mb-4">
+            <h5 class="fw-600 mb-4">Pricing & Stock</h5>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Selling Price (RM) *</label>
+                <input type="number" class="form-control" name="price" required
+                       min="0" step="0.01" placeholder="0.00"/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Original Price (RM)</label>
+                <input type="number" class="form-control" name="original_price"
+                       min="0" step="0.01" placeholder="0.00"/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Stock Quantity *</label>
+                <input type="number" class="form-control" name="stock" required
+                       min="0" placeholder="0"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-4 border rounded-lg mb-4">
+            <h5 class="fw-600 mb-4">Variants</h5>
+            <div class="mb-3">
+              <label class="form-label">Available Sizes</label>
+              <div class="d-flex flex-wrap gap-2">
+                {% for sz in sizes %}
+                <label class="d-flex align-items-center gap-1 small">
+                  <input type="checkbox" name="sizes" value="{{ sz }}" class="form-check-input"/> {{ sz }}
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Colors</label>
+              <input type="text" class="form-control" name="colors"
+                     placeholder="e.g. White, Black, Navy (comma separated)"/>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tags</label>
+              <input type="text" class="form-control" name="tags"
+                     placeholder="e.g. casual, summer, cotton (comma separated)"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="p-4 border rounded-lg mb-4">
+            <h5 class="fw-600 mb-4">Product Images</h5>
+            <div class="border-2 border-dashed rounded-lg p-4 text-center" style="border:2px dashed #e0e0e0"
+                 id="dropZone">
+              <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+              <div class="small text-muted mb-2">Drag & drop or click to upload</div>
+              <div class="text-muted" style="font-size:11px">PNG, JPG, WEBP up to 10MB</div>
+              <input type="file" name="images" id="imageInput" multiple accept="image/*"
+                     class="d-none" onchange="previewImages(this)"/>
+              <button type="button" class="btn btn-outline-dark btn-sm mt-3"
+                      onclick="document.getElementById('imageInput').click()">Browse Files</button>
+            </div>
+            <div id="imagePreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+          </div>
+
+          <div class="p-4 border rounded-lg">
+            <h5 class="fw-600 mb-3">Visibility</h5>
+            <div class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" name="is_featured" id="featuredCheck"/>
+              <label class="form-check-label small" for="featuredCheck">
+                Feature this product on homepage
+              </label>
+            </div>
+          </div>
+
+          <div class="mt-4 d-grid gap-2">
+            <button type="submit" class="btn btn-dark btn-lg">
+              <i class="fas fa-plus me-2"></i> Add Product
+            </button>
+            <a href="{{ url_for('seller.products') }}" class="btn btn-outline-dark">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewImages(input) {
+  const preview = document.getElementById('imagePreview');
+  preview.innerHTML = '';
+  Array.from(input.files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement('div');
+      div.style.cssText = 'width:70px;height:70px;border-radius:6px;overflow:hidden;border:1px solid #eee';
+      div.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover"/>`;
+      preview.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+// Drag & drop
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor='#111'; });
+dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor='#e0e0e0'; });
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.style.borderColor='#e0e0e0';
+  document.getElementById('imageInput').files = e.dataTransfer.files;
+  previewImages(document.getElementById('imageInput'));
+});
+</script>
+{% endblock %}

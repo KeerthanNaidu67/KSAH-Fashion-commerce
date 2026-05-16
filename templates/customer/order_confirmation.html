@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmed — KSAH{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 text-center">
+      <div class="success-animation">
+        <i class="fas fa-check"></i>
+      </div>
+      <h1 style="font-family:'Poppins',sans-serif;font-size:2rem;font-weight:700;margin-bottom:8px">
+        Order Confirmed!
+      </h1>
+      <p class="text-muted mb-4">
+        Thank you for your purchase. We'll send you a confirmation email shortly.
+      </p>
+
+      <div class="p-4 border rounded-lg mb-4 text-start">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="text-muted small">Order Number</div>
+            <div class="fw-600">{{ order.order_number }}</div>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small">Tracking ID</div>
+            <div class="fw-600 text-accent">{{ order.tracking_id }}</div>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small">Order Date</div>
+            <div class="fw-600">{{ order.created_at.strftime('%d %b %Y') if order.created_at else 'Today' }}</div>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small">Payment Status</div>
+            <span class="badge-status badge-confirmed">{{ order.payment.get('status','completed')|title }}</span>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small">Status</div>
+            <span class="badge-status badge-confirmed">{{ order.status|title }}</span>
+          </div>
+          <div class="col-md-6">
+            <div class="text-muted small">Total Paid</div>
+            <div class="fw-700 text-dark" style="font-size:1.1rem">RM{{ "%.2f"|format(order.total) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Items Summary -->
+      <div class="p-4 border rounded-lg mb-4 text-start">
+        <h6 class="fw-600 mb-3">Items Ordered</h6>
+        {% for item in order.items %}
+        <div class="d-flex gap-3 mb-3 pb-3 {% if not loop.last %}border-bottom{% endif %}">
+          <img src="{{ item.image }}" style="width:60px;height:78px;object-fit:cover;border-radius:6px"
+               onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=120'"/>
+          <div class="flex-grow-1">
+            <div class="fw-500 small">{{ item.name }}</div>
+            <div class="text-muted" style="font-size:11px">{{ item.brand }} · Qty: {{ item.quantity }}</div>
+          </div>
+          <div class="fw-600 small">RM{{ "%.2f"|format(item.subtotal) }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Shipping Address -->
+      <div class="p-4 border rounded-lg mb-5 text-start">
+        <h6 class="fw-600 mb-2"><i class="fas fa-map-marker-alt me-2 text-accent"></i>Shipping To</h6>
+        <div class="text-muted small">
+          {{ order.shipping_address.get('full_name','') }}<br>
+          {{ order.shipping_address.get('address','') }},
+          {{ order.shipping_address.get('city','') }},
+          {{ order.shipping_address.get('state','') }}
+          {{ order.shipping_address.get('zip_code','') }},
+          {{ order.shipping_address.get('country','') }}
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 justify-content-center">
+        <a href="{{ url_for('customer.track_order', order_id=order._id) }}" class="btn btn-dark btn-lg">
+          <i class="fas fa-map-pin me-2"></i> Track Order
+        </a>
+        <a href="{{ url_for('customer.home') }}" class="btn btn-outline-dark btn-lg">
+          Continue Shopping
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

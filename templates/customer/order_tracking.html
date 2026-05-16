@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Track Order {{ order.order_number }} — KSAH{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav><ol class="breadcrumb mb-2">
+      <li class="breadcrumb-item"><a href="{{ url_for('customer.home') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('customer.orders') }}">My Orders</a></li>
+      <li class="breadcrumb-item active">Track Order</li>
+    </ol></nav>
+    <h1 class="mb-0">Track Order</h1>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4 justify-content-center">
+    <div class="col-lg-8">
+      <!-- Order Info -->
+      <div class="p-4 border rounded-lg mb-4">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="text-muted small">Order Number</div>
+            <div class="fw-600">{{ order.order_number }}</div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted small">Tracking ID</div>
+            <div class="fw-600 text-accent">{{ order.tracking_id }}</div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted small">Current Status</div>
+            <span class="badge-status badge-{{ order.status }}">{{ order.status|title }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tracking Timeline -->
+      <div class="p-4 border rounded-lg mb-4">
+        <h5 class="fw-600 mb-4">Order Progress</h5>
+        {% set steps = [
+          ('pending', 'Order Placed', 'fas fa-shopping-cart', 'Your order has been received'),
+          ('confirmed', 'Order Confirmed', 'fas fa-check-circle', 'Your order is confirmed and being prepared'),
+          ('processing', 'Processing', 'fas fa-cog', 'Your items are being packed'),
+          ('shipped', 'Shipped', 'fas fa-shipping-fast', 'Your order is on the way'),
+          ('delivered', 'Delivered', 'fas fa-home', 'Your order has been delivered'),
+        ] %}
+        <div class="tracking-timeline">
+          {% for status, label, icon, desc in steps %}
+          {% set completed = order.status_index >= loop.index0 %}
+          {% set is_current = order.status == status %}
+          <div class="tracking-step {{ 'completed' if completed and not is_current else '' }} {{ 'current' if is_current else '' }}">
+            <div class="step-icon">
+              <i class="{{ icon }}"></i>
+            </div>
+            <div>
+              <div class="fw-600 small {% if not completed %}text-muted{% endif %}">{{ label }}</div>
+              <div class="text-muted" style="font-size:12px">{{ desc }}</div>
+              {% if is_current %}
+              <div class="text-accent small fw-500 mt-1">
+                <i class="fas fa-circle-notch fa-spin me-1"></i> In progress
+              </div>
+              {% elif completed %}
+              <div class="text-success small mt-1">
+                <i class="fas fa-check me-1"></i> Completed
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Shipping Address -->
+      <div class="p-4 border rounded-lg mb-4">
+        <h5 class="fw-600 mb-3">Shipping To</h5>
+        <div class="text-muted small">
+          <strong class="text-dark">{{ order.shipping_address.get('full_name','') }}</strong><br>
+          {{ order.shipping_address.get('address','') }}<br>
+          {{ order.shipping_address.get('city','') }},
+          {{ order.shipping_address.get('state','') }}
+          {{ order.shipping_address.get('zip_code','') }}<br>
+          {{ order.shipping_address.get('country','') }}<br>
+          {{ order.shipping_address.get('phone','') }}
+        </div>
+      </div>
+
+      <!-- Items -->
+      <div class="p-4 border rounded-lg">
+        <h5 class="fw-600 mb-3">Items</h5>
+        {% for item in order.items %}
+        <div class="d-flex gap-3 mb-3 {% if not loop.last %}pb-3 border-bottom{% endif %}">
+          <img src="{{ item.image }}" style="width:60px;height:78px;object-fit:cover;border-radius:6px"
+               onerror="this.src='https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=120'"/>
+          <div class="flex-grow-1">
+            <div class="fw-500 small">{{ item.name }}</div>
+            <div class="text-muted" style="font-size:11px">{{ item.brand }}{% if item.size %} · {{ item.size }}{% endif %} · Qty: {{ item.quantity }}</div>
+          </div>
+          <div class="fw-600 small">RM{{ "%.2f"|format(item.subtotal) }}</div>
+        </div>
+        {% endfor %}
+        <div class="border-top pt-3 mt-2 d-flex justify-content-between fw-600">
+          <span>Total</span>
+          <span>RM{{ "%.2f"|format(order.total) }}</span>
+        </div>
+      </div>
+
+      <div class="mt-4 d-flex gap-3">
+        <a href="{{ url_for('customer.orders') }}" class="btn btn-outline-dark">
+          <i class="fas fa-arrow-left me-2"></i> All Orders
+        </a>
+        <a href="{{ url_for('customer.products') }}" class="btn btn-dark">Continue Shopping</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

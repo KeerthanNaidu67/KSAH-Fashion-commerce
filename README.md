@@ -1,19 +1,47 @@
-# LUXE — Fashion E-Commerce Platform
-## ICT602 Group Project 3
+# KSAH — Fashion E-Commerce Platform
 
-A modern, full-stack fashion e-commerce platform built with Flask, MongoDB, and Bootstrap 5.
+A full-stack fashion e-commerce web application built with Python Flask, MongoDB, and Bootstrap 5, following the MVC architectural pattern. The platform supports three user roles — Customer, Seller, and Admin — each with dedicated dashboards and access controls.
+
+> ICT602 Software Engineering — Group Project 3
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Backend | Python Flask (MVC) |
+|---|---|
+| Backend | Python Flask |
+| Architecture | MVC (Model-View-Controller) |
 | Database | MongoDB (PyMongo) |
-| Frontend | HTML5, CSS3, Bootstrap 5, JavaScript |
-| Auth | Flask-Login + Werkzeug |
-| Templates | Jinja2 |
+| Templating | Jinja2 |
+| Frontend | Bootstrap 5, HTML5, CSS3, JavaScript |
+| Authentication | Flask-Login + Werkzeug |
+| Configuration | python-dotenv |
+
+---
+
+## Features
+
+### Customer
+- Browse products by category (Men, Women, Accessories)
+- Search and filter by keyword, price range, size, and brand
+- Shopping cart with promo code discounts
+- Checkout with card, e-wallet, and COD payment options
+- Order history and order tracking
+- Wishlist management
+- Product reviews and star ratings
+
+### Seller
+- Seller dashboard with sales statistics
+- Add, edit, and delete product listings
+- Product image upload
+- Order management
+
+### Admin
+- Admin dashboard with platform-wide statistics
+- User management (activate / suspend accounts)
+- Product moderation
+- Order status management
 
 ---
 
@@ -21,20 +49,37 @@ A modern, full-stack fashion e-commerce platform built with Flask, MongoDB, and 
 
 ### Prerequisites
 - Python 3.10+
-- MongoDB running locally (`mongodb://localhost:27017`)
+- MongoDB running locally on `mongodb://localhost:27017`
 
-### 1. Install Dependencies
+**Start MongoDB (macOS):**
 ```bash
+brew services start mongodb-community
+```
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
 cd fashion-ecommerce
+```
+
+### 2. Create and Activate Virtual Environment
+```bash
+python -m venv .venv
+source .venv/bin/activate        # macOS / Linux
+.venv\Scripts\activate           # Windows
+```
+
+### 3. Install Dependencies
+```bash
 pip install -r requirements.txt
 ```
 
-### 2. Seed the Database
+### 4. Seed the Database
 ```bash
 python database/seed.py
 ```
 
-### 3. Run the App
+### 5. Run the App
 ```bash
 python app.py
 ```
@@ -46,10 +91,20 @@ Visit: **http://localhost:5000**
 ## Demo Credentials
 
 | Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@luxefashion.com | admin123 |
-| Seller | seller@luxefashion.com | seller123 |
-| Customer | customer@luxefashion.com | customer123 |
+|---|---|---|
+| Admin | admin@ksahfashion.com | admin123 |
+| Seller | seller@ksahfashion.com | seller123 |
+| Customer | customer@ksahfashion.com | customer123 |
+
+---
+
+## Promo Codes
+
+| Code | Discount |
+|---|---|
+| `FASHION20` | 20% off |
+| `STYLE10` | 10% off |
+| `NEW15` | 15% off |
 
 ---
 
@@ -57,23 +112,23 @@ Visit: **http://localhost:5000**
 
 ```
 fashion-ecommerce/
-├── app.py                    # Flask application factory
-├── config.py                 # Environment configuration
+├── app.py                    # Flask application entry point
+├── config.py                 # DevelopmentConfig / ProductionConfig
 ├── requirements.txt
 │
 ├── database/
-│   ├── db.py                 # MongoDB singleton connector
-│   └── seed.py               # Sample data seeder
+│   ├── db.py                 # get_db() — singleton MongoDB connection
+│   └── seed.py               # Demo data seeder
 │
-├── models/                   # Data layer (M in MVC)
+├── models/                   # Model layer (M in MVC)
 │   ├── user.py               # User, Customer, Seller, Admin
-│   ├── product.py            # Product model
-│   ├── cart.py               # Cart + CartItem
-│   ├── order.py              # Order + OrderItem
+│   ├── product.py            # Product, Inventory
+│   ├── cart.py               # Cart, CartItem
+│   ├── order.py              # Order, OrderItem
 │   ├── review.py             # Product reviews
 │   └── wishlist.py           # Customer wishlist
 │
-├── controllers/              # Business logic (C in MVC)
+├── controllers/              # Controller layer (C in MVC)
 │   ├── auth_controller.py
 │   ├── product_controller.py
 │   ├── cart_controller.py
@@ -81,83 +136,47 @@ fashion-ecommerce/
 │   ├── seller_controller.py
 │   └── admin_controller.py
 │
-├── routes/                   # URL routing (Flask Blueprints)
-│   ├── auth.py               # /auth/*
-│   ├── customer.py           # /, /products, /cart, /checkout
-│   ├── seller.py             # /seller/*
-│   └── admin.py              # /admin/*
+├── routes/                   # Flask Blueprints — URL mapping
+│   ├── auth.py               # /login, /register, /logout
+│   ├── customer.py           # /, /products, /cart, /checkout, /orders
+│   ├── seller.py             # /seller/...
+│   └── admin.py              # /admin/...
 │
-├── templates/                # Jinja2 HTML templates (V in MVC)
+├── templates/                # View layer — Jinja2 HTML (V in MVC)
 │   ├── base.html             # Shared layout
-│   ├── auth/                 # Login, Register
-│   ├── customer/             # Home, Products, Cart, Checkout...
-│   ├── seller/               # Dashboard, Products, Orders
-│   ├── admin/                # Dashboard, Users, Products, Orders
-│   └── errors/               # 404, 500
+│   ├── auth/                 # login.html, register.html
+│   ├── customer/             # home, products, cart, checkout, orders, wishlist
+│   ├── seller/               # dashboard, products, add/edit product, orders
+│   ├── admin/                # dashboard, users, products, orders
+│   └── errors/               # 404.html, 500.html
 │
 └── static/
-    ├── css/main.css          # Premium white minimal theme
-    ├── js/main.js            # Interactive features
+    ├── css/                  # Stylesheet
+    ├── js/                   # Frontend JavaScript
     └── images/products/      # Uploaded product images
 ```
 
 ---
 
+## Database Collections
+
+| Collection | Purpose |
+|---|---|
+| `users` | All user accounts (customer / seller / admin) |
+| `products` | Product catalogue managed by sellers |
+| `carts` | Active shopping carts (one per user) |
+| `orders` | Placed orders with status tracking |
+| `reviews` | Product reviews and star ratings |
+| `wishlists` | Customer saved products |
+| `inventory` | Product stock management |
+
+---
+
 ## Architecture
 
-### MVC Pattern
-- **Model**: `models/` — MongoDB documents with OOP encapsulation
-- **View**: `templates/` — Jinja2 templates with Bootstrap 5
-- **Controller**: `controllers/` — Business logic separated from routes
+The application follows the **MVC (Model-View-Controller)** pattern combined with a **Client-Server** architecture:
 
-### OOP Principles
-- **Encapsulation**: Each model encapsulates its data and DB operations
-- **Inheritance**: Customer, Seller, Admin all extend base User concepts
-- **Abstraction**: Controllers abstract business logic from route handlers
-- **SOLID**: Single-responsibility classes per domain entity
-
-### Database Collections
-| Collection | Purpose |
-|-----------|---------|
-| users | All user accounts (customer/seller/admin) |
-| products | Product listings |
-| cart | Shopping carts (1 per user) |
-| orders | Placed orders |
-| reviews | Product reviews |
-| wishlist | User wishlists |
-
----
-
-## Features
-
-### Customer
-- Browse products with search + filter (category, price, size, brand)
-- Product detail with gallery, reviews, related products
-- Cart with promo codes (FASHION20, STYLE10, NEW15)
-- Checkout with address + payment simulation
-- Order tracking with timeline
-- Wishlist management
-- Star ratings and reviews
-
-### Seller
-- Dashboard with sales analytics
-- Product CRUD with image upload
-- Low stock alerts
-- Order management
-
-### Admin
-- Platform KPI dashboard
-- User/Seller management (activate/suspend)
-- Product moderation
-- Order status management
-
----
-
-## Promo Codes
-- `FASHION20` — 20% off
-- `STYLE10` — 10% off
-- `NEW15` — 15% off
-
----
-
-*ICT602 Software Engineering — Assignment 3 | Group Project*
+- **Model** — `models/` handles all data, business logic, and MongoDB operations
+- **View** — `templates/` renders HTML via Jinja2, no business logic
+- **Controller** — `controllers/` orchestrates between Model and View
+- **Routes** — `routes/` maps URLs to controller functions via Flask Blueprints

@@ -1,4 +1,11 @@
-from flask import session, flash
+# controllers/auth_controller.py
+# Authentication controller for the KSAH Fashion E-Commerce platform.
+# Handles user registration with field validation, login with password
+# checking and account status verification, and logout.
+# Used by routes/auth.py. Returns (bool, message) tuples so the route
+# layer can flash the message and redirect accordingly.
+
+from flask import flash
 from models.user import User
 from flask_login import login_user, logout_user
 
@@ -50,4 +57,3 @@ class AuthController:
     @staticmethod
     def logout():
         logout_user()
-        session.clear()

@@ -1,3 +1,10 @@
+# models/user.py
+# User model for the KSAH Fashion E-Commerce platform.
+# Represents all user accounts regardless of role (customer, seller, admin).
+# Implements the Flask-Login user interface (is_authenticated, get_id, etc.)
+# and provides class methods for database operations: find, create, count, save.
+# Passwords are stored as bcrypt hashes via werkzeug.security.
+
 from datetime import datetime
 from bson import ObjectId
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -79,8 +86,10 @@ class User:
     def save(self) -> str:
         db = get_db()
         if self._id:
+            # Update existing user document
             db.users.update_one({'_id': self._id}, {'$set': self.to_dict()})
             return str(self._id)
+        # Insert new user and store the generated _id
         result = db.users.insert_one(self.to_dict())
         self._id = result.inserted_id
         return str(self._id)

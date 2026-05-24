@@ -20,12 +20,12 @@
           <div class="row g-3">
             <div class="col-12">
               <label class="form-label">Full Name</label>
-              <input type="text" class="form-control" name="full_name" required
+              <input type="text" class="form-control" name="full_name"
                      value="{{ user.name }}"/>
             </div>
             <div class="col-md-6">
               <label class="form-label">Phone</label>
-              <input type="tel" class="form-control" name="phone" required
+              <input type="tel" class="form-control" name="phone"
                      value="{{ user.phone }}"/>
             </div>
             <div class="col-md-6">
@@ -39,13 +39,13 @@
             </div>
             <div class="col-12">
               <label class="form-label">Street Address</label>
-              <input type="text" class="form-control" name="address" required
+              <input type="text" class="form-control" name="address"
                      placeholder="Enter your street address"
                      value="{{ user.address.get('street','') if user.address else '' }}"/>
             </div>
             <div class="col-md-5">
               <label class="form-label">City</label>
-              <input type="text" class="form-control" name="city" required
+              <input type="text" class="form-control" name="city"
                      placeholder="City"
                      value="{{ user.address.get('city','') if user.address else '' }}"/>
             </div>
@@ -56,7 +56,7 @@
             </div>
             <div class="col-md-3">
               <label class="form-label">Postcode</label>
-              <input type="text" class="form-control" name="zip_code" required
+              <input type="text" class="form-control" name="zip_code"
                      placeholder="00000"
                      value="{{ user.address.get('zip','') if user.address else '' }}"/>
             </div>

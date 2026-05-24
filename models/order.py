@@ -1,3 +1,11 @@
+# models/order.py
+# Order model for the KSAH Fashion E-Commerce platform.
+# Represents a customer's placed order containing one or more OrderItems.
+# Tracks shipping address, payment method, order status, and a tracking ID.
+# create_from_cart() converts a Cart into a saved Order and deducts stock.
+# get_seller_orders() filters orders by seller_id embedded in items for the
+# seller dashboard. ORDER_STATUSES defines the allowed status progression.
+
 from datetime import datetime
 from bson import ObjectId
 from database.db import get_db
@@ -9,6 +17,7 @@ ORDER_STATUSES = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 
 class OrderItem:
     def __init__(self, data: dict):
         self.product_id = data.get('product_id')
+        self.seller_id = data.get('seller_id')
         self.name = data.get('name', '')
         self.brand = data.get('brand', '')
         self.price = float(data.get('price', 0))
@@ -24,6 +33,7 @@ class OrderItem:
     def to_dict(self) -> dict:
         return {
             'product_id': self.product_id,
+            'seller_id': self.seller_id,
             'name': self.name,
             'brand': self.brand,
             'price': self.price,
@@ -147,7 +157,6 @@ class Order:
     def get_seller_orders(cls, seller_id) -> list:
         docs = get_db().orders.find({
             'items.seller_id': seller_id,
-            'status': 'delivered'
         }).sort('created_at', -1)
         return [cls(d) for d in docs]
 

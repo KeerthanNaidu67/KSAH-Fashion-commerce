@@ -1,3 +1,10 @@
+# models/product.py
+# Product model for the KSAH Fashion E-Commerce platform.
+# Represents fashion products listed by sellers. Supports filtering by category,
+# brand, price range, size, and keyword search via MongoDB regex queries.
+# Also tracks stock levels, ratings, and featured status.
+# Used by sellers (CRUD), customers (browse/search), and admins (moderation).
+
 from datetime import datetime
 from bson import ObjectId
 from database.db import get_db

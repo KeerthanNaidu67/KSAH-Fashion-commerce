@@ -1013,10 +1013,8 @@ img { max-width: 100%; display: block; }
 /* ── Review Stars ────────────────────────────────────────── */
 .review-stars input { display: none; }
 .review-stars label { font-size: 24px; color: #ddd; cursor: pointer; }
-.review-stars input:checked ~ label,
-.review-stars label:hover,
-.review-stars label:hover ~ label { color: #f59e0b; }
-.review-stars { display: flex; flex-direction: row-reverse; justify-content: flex-end; }
+.review-stars label.active { color: #f59e0b; }
+.review-stars { display: flex; flex-direction: row; gap: 4px; }
 
 /* ── Page Header ─────────────────────────────────────────── */
 .page-header {

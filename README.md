@@ -1,8 +1,19 @@
 # KSAH — Fashion E-Commerce Platform
 
-A full-stack fashion e-commerce web application built with Python Flask, MongoDB, and Bootstrap 5, following the MVC architectural pattern. The platform supports three user roles — Customer, Seller, and Admin — each with dedicated dashboards and access controls.
+A full-stack fashion e-commerce web application built with Python Flask, MongoDB, and Bootstrap 5, following the MVC architectural pattern. The platform supports three user roles — Customer, Seller, and Admin — each with dedicated dashboards and role-based access control.
 
-> ICT602 Software Engineering 
+> ICT602 Software Engineering — Group Project 3
+
+---
+
+## Team Members
+
+| Name | Student ID | Role |
+|---|---|---|
+| Shaik Mohammed Hayath | 65939 | Project Lead — Database layer, models, seller dashboard |
+| Janyavula Sai Keerthan | 66041 | Second Lead — App foundation, authentication, product browsing |
+| Md Atiqul Islam Akash | 65868 | Cart, checkout, order management |
+| Rafikul Haque | 67168 | Admin panel, shared UI layout, error handling |
 
 ---
 
@@ -29,19 +40,28 @@ A full-stack fashion e-commerce web application built with Python Flask, MongoDB
 - Checkout with card, e-wallet, and COD payment options
 - Order history and order tracking
 - Wishlist management
-- Product reviews and star ratings
+- Product reviews and star ratings (1–5)
 
 ### Seller
-- Seller dashboard with sales statistics
+- Seller dashboard with real-time sales statistics
 - Add, edit, and delete product listings
-- Product image upload
-- Order management
+- Product image upload with file type validation
+- View orders containing seller's own products
 
 ### Admin
-- Admin dashboard with platform-wide statistics
-- User management (activate / suspend accounts)
-- Product moderation
-- Order status management
+- Admin dashboard with platform-wide statistics and monthly revenue
+- User management — activate or suspend customer/seller accounts
+- Product moderation — activate or deactivate listings
+- Order status management across all orders
+
+---
+
+## Security
+
+- Passwords are securely hashed using Werkzeug's `generate_password_hash` before storage — no plain-text passwords are saved in MongoDB
+- Role-based access control via per-blueprint decorators (`seller_required`, `admin_required`) prevents unauthorized access
+- File uploads validated against an allowed extension whitelist before saving
+- Suspended accounts are blocked from logging in
 
 ---
 
@@ -112,41 +132,41 @@ Visit: **http://localhost:5000**
 
 ```
 fashion-ecommerce/
-├── app.py                    # Flask application entry point
+├── app.py                    # Flask application factory — registers blueprints, error handlers
 ├── config.py                 # DevelopmentConfig / ProductionConfig
 ├── requirements.txt
 │
 ├── database/
-│   ├── db.py                 # get_db() — singleton MongoDB connection
-│   └── seed.py               # Demo data seeder
+│   ├── db.py                 # Singleton MongoDB connection via get_db()
+│   └── seed.py               # Demo data seeder (users, products, orders, reviews)
 │
 ├── models/                   # Model layer (M in MVC)
-│   ├── user.py               # User, Customer, Seller, Admin
-│   ├── product.py            # Product, Inventory
-│   ├── cart.py               # Cart, CartItem
-│   ├── order.py              # Order, OrderItem
-│   ├── review.py             # Product reviews
-│   └── wishlist.py           # Customer wishlist
+│   ├── user.py               # User model — auth, roles, profile
+│   ├── product.py            # Product model — listing, filtering, stock
+│   ├── cart.py               # Cart + CartItem — add, remove, promo codes
+│   ├── order.py              # Order + OrderItem — checkout, tracking
+│   ├── review.py             # Product reviews and star ratings
+│   └── wishlist.py           # Customer saved products
 │
 ├── controllers/              # Controller layer (C in MVC)
-│   ├── auth_controller.py
-│   ├── product_controller.py
-│   ├── cart_controller.py
-│   ├── order_controller.py
-│   ├── seller_controller.py
-│   └── admin_controller.py
+│   ├── auth_controller.py    # Registration, login, logout
+│   ├── product_controller.py # Product listing, detail, review submission
+│   ├── cart_controller.py    # Cart CRUD, promo codes, wishlist toggle
+│   ├── order_controller.py   # Checkout, order history, cancellation
+│   ├── seller_controller.py  # Seller dashboard, product CRUD, image upload
+│   └── admin_controller.py   # Dashboard stats, user/product/order management
 │
 ├── routes/                   # Flask Blueprints — URL mapping
-│   ├── auth.py               # /login, /register, /logout
-│   ├── customer.py           # /, /products, /cart, /checkout, /orders
-│   ├── seller.py             # /seller/...
-│   └── admin.py              # /admin/...
+│   ├── auth.py               # /auth/login, /auth/register, /auth/logout
+│   ├── customer.py           # /, /products, /cart, /checkout, /orders, /wishlist
+│   ├── seller.py             # /seller/dashboard, /seller/products, /seller/orders
+│   └── admin.py              # /admin/dashboard, /admin/users, /admin/products, /admin/orders
 │
 ├── templates/                # View layer — Jinja2 HTML (V in MVC)
-│   ├── base.html             # Shared layout
+│   ├── base.html             # Shared layout with navbar, cart badge, Bootstrap 5
 │   ├── auth/                 # login.html, register.html
-│   ├── customer/             # home, products, cart, checkout, orders, wishlist
-│   ├── seller/               # dashboard, products, add/edit product, orders
+│   ├── customer/             # home, products, product_detail, cart, checkout, orders, wishlist
+│   ├── seller/               # dashboard, products, add_product, edit_product, orders
 │   ├── admin/                # dashboard, users, products, orders
 │   └── errors/               # 404.html, 500.html
 │
@@ -164,11 +184,10 @@ fashion-ecommerce/
 |---|---|
 | `users` | All user accounts (customer / seller / admin) |
 | `products` | Product catalogue managed by sellers |
-| `carts` | Active shopping carts (one per user) |
-| `orders` | Placed orders with status tracking |
+| `cart` | Active shopping carts (one per user) |
+| `orders` | Placed orders with embedded items and status tracking |
 | `reviews` | Product reviews and star ratings |
-| `wishlists` | Customer saved products |
-| `inventory` | Product stock management |
+| `wishlist` | Customer saved product references |
 
 ---
 
@@ -176,7 +195,23 @@ fashion-ecommerce/
 
 The application follows the **MVC (Model-View-Controller)** pattern combined with a **Client-Server** architecture:
 
-- **Model** — `models/` handles all data, business logic, and MongoDB operations
+- **Model** — `models/` handles all data and MongoDB operations
 - **View** — `templates/` renders HTML via Jinja2, no business logic
-- **Controller** — `controllers/` orchestrates between Model and View
-- **Routes** — `routes/` maps URLs to controller functions via Flask Blueprints
+- **Controller** — `controllers/` contains all business logic
+- **Routes** — `routes/` maps URLs to controllers via Flask Blueprints
+
+```
+Browser → Routes (Blueprint) → Controller → Model → MongoDB
+                                    ↓
+                              Jinja2 Template → Browser
+```
+
+---
+
+## Testing
+
+- **40 manual test cases** covering all three user roles
+- **White Box Testing** — branch coverage and boundary value analysis on controller logic
+- **Black Box Testing** — use case testing and equivalence partitioning through the UI
+- All 40 test cases passed
+- Full test report: `testing/test_report.md`

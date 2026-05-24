@@ -1,3 +1,10 @@
+# models/review.py
+# Review model for the KSAH Fashion E-Commerce platform.
+# Stores customer star ratings (1–5) and comments for products.
+# get_avg_rating() uses a MongoDB aggregation pipeline to compute the
+# average rating and total review count for a product.
+# user_reviewed() prevents duplicate reviews from the same user.
+
 from datetime import datetime
 from bson import ObjectId
 from database.db import get_db

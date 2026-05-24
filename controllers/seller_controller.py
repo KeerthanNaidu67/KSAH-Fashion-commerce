@@ -1,3 +1,11 @@
+# controllers/seller_controller.py
+# Seller controller for the KSAH Fashion E-Commerce platform.
+# Handles all seller dashboard operations: dashboard statistics (products,
+# stock levels, orders, revenue), and full product CRUD with image upload.
+# _allowed_file() validates uploaded image file extensions before saving.
+# Each operation enforces seller ownership — sellers can only edit/delete
+# their own products. Used by routes/seller.py.
+
 import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -10,6 +18,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 
 def _allowed_file(filename: str) -> bool:
+    # Check if the uploaded file has a permitted image extension
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
@@ -65,6 +74,7 @@ class SellerController:
             os.makedirs(upload_folder, exist_ok=True)
             for f in files.getlist('images'):
                 if f and _allowed_file(f.filename):
+                    # Prefix filename with timestamp to avoid name collisions
                     fname = secure_filename(f.filename)
                     fname = f"{datetime.utcnow().timestamp()}_{fname}"
                     f.save(os.path.join(upload_folder, fname))

@@ -33,9 +33,15 @@
           <td class="small">{{ order.items|length }} item{% if order.items|length != 1 %}s{% endif %}</td>
           <td class="fw-600 small">RM{{ "%.2f"|format(order.total) }}</td>
           <td><span class="badge-status badge-{{ order.status }}">{{ order.status|title }}</span></td>
-          <td>
+          <td class="d-flex gap-2">
             <a href="{{ url_for('customer.track_order', order_id=order._id) }}"
                class="btn btn-sm btn-outline-dark">Track</a>
+            {% if order.status in ('pending', 'confirmed') %}
+            <form method="POST" action="{{ url_for('customer.cancel_order', order_id=order._id) }}"
+                  onsubmit="return confirm('Cancel this order?')">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+            </form>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

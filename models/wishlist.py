@@ -1,3 +1,9 @@
+# models/wishlist.py
+# Wishlist model for the KSAH Fashion E-Commerce platform.
+# Each customer has one Wishlist document storing a list of product ObjectIds.
+# Supports add, remove, contains check, and get_products() to load full
+# Product objects. get_or_create() ensures a wishlist always exists for a user.
+
 from bson import ObjectId
 from database.db import get_db
 

@@ -1,6 +1,16 @@
+# controllers/order_controller.py
+# Order controller for the KSAH Fashion E-Commerce platform.
+# Handles the full checkout flow: validating cart contents, building the
+# shipping address and payment dict, deducting product stock, creating
+# the Order from the Cart, and clearing the cart on success.
+# Also provides order history, detail view, and cancellation.
+# Used by routes/customer.py.
+
+from datetime import datetime
 from models.order import Order
 from models.cart import Cart
 from models.product import Product
+from database.db import get_db
 
 
 class OrderController:
@@ -30,10 +40,11 @@ class OrderController:
         }
 
         # Validate required fields
-        required = ['address', 'city', 'zip_code']
+        required = ['full_name', 'phone', 'address', 'city', 'zip_code']
         for field in required:
-            if not shipping_address.get(field):
-                return False, f'{field.replace("_", " ").title()} is required.', None
+            if not shipping_address.get(field) and not (field == 'full_name' and user.name):
+                label = field.replace('_', ' ').title()
+                return False, f'{label} is required.', None
 
         # Deduct stock
         for item in cart.items:
@@ -57,3 +68,18 @@ class OrderController:
         if user_id and order.user_id != user_id:
             return None
         return order
+
+    @staticmethod
+    def cancel_order(order_id: str, user_id) -> tuple[bool, str]:
+        order = Order.find_by_id(order_id)
+        if not order:
+            return False, 'Order not found.'
+        if order.user_id != user_id:
+            return False, 'Unauthorized.'
+        if order.status not in ('pending', 'confirmed'):
+            return False, 'Order cannot be cancelled at this stage.'
+        get_db().orders.update_one(
+            {'_id': order._id},
+            {'$set': {'status': 'cancelled', 'updated_at': datetime.utcnow()}}
+        )
+        return True, 'Order cancelled successfully.'

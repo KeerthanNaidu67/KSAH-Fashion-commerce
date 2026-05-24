@@ -1,3 +1,10 @@
+# controllers/cart_controller.py
+# Cart controller for the KSAH Fashion E-Commerce platform.
+# Handles all shopping cart operations: adding items (with stock and size
+# validation), updating quantity, removing items, applying promo codes,
+# and toggling wishlist items. Used by routes/customer.py.
+# Returns (bool, message) tuples for flash messaging in the route layer.
+
 from models.cart import Cart
 from models.product import Product
 from models.wishlist import Wishlist

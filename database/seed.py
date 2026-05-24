@@ -136,12 +136,12 @@ def seed():
     db.wishlist.drop()
 
     print("👤 Creating users...")
-    admin = User.create('admin@luxefashion.com', 'Admin User', 'admin123', role='admin')
-    seller1 = User.create('seller@luxefashion.com', 'Style Hub', 'seller123', role='seller',
+    admin = User.create('admin@ksahfashion.com', 'Admin User', 'admin123', role='admin')
+    seller1 = User.create('seller@ksahfashion.com', 'Style Hub', 'seller123', role='seller',
                           phone='+601112345678')
-    seller2 = User.create('trendy@luxefashion.com', 'Trendy Picks', 'seller123', role='seller',
+    seller2 = User.create('trendy@ksahfashion.com', 'Trendy Picks', 'seller123', role='seller',
                           phone='+601198765432')
-    customer1 = User.create('customer@luxefashion.com', 'Sarah Johnson', 'customer123', role='customer',
+    customer1 = User.create('customer@ksahfashion.com', 'Sarah Johnson', 'customer123', role='customer',
                             phone='+601133445566',
                             address={'street': '12 Jalan Bukit Bintang', 'city': 'Kuala Lumpur',
                                      'state': 'WP', 'zip': '50200', 'country': 'Malaysia'})
@@ -227,9 +227,9 @@ def seed():
 
     print("\n✅ Seed complete!")
     print("─" * 40)
-    print("Admin:    admin@luxefashion.com    / admin123")
-    print("Seller:   seller@luxefashion.com   / seller123")
-    print("Customer: customer@luxefashion.com / customer123")
+    print("Admin:    admin@ksahfashion.com    / admin123")
+    print("Seller:   seller@ksahfashion.com   / seller123")
+    print("Customer: customer@ksahfashion.com / customer123")
     print("─" * 40)
 
 

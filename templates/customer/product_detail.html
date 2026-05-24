@@ -1,6 +1,26 @@
 {% extends "base.html" %}
 {% block title %}{{ product.name }} — KSAH{% endblock %}
 
+{% block extra_css %}
+<style>
+  .review-stars { display: flex !important; flex-direction: row !important; gap: 4px; }
+  .review-stars input { display: none !important; }
+  .review-stars label { font-size: 24px; color: #ddd !important; cursor: pointer; }
+  .review-stars label.hovered { color: #f59e0b !important; }
+  .review-stars:has(input[value="1"]:checked) label[data-value="1"] { color: #f59e0b !important; }
+  .review-stars:has(input[value="2"]:checked) label[data-value="1"],
+  .review-stars:has(input[value="2"]:checked) label[data-value="2"] { color: #f59e0b !important; }
+  .review-stars:has(input[value="3"]:checked) label[data-value="1"],
+  .review-stars:has(input[value="3"]:checked) label[data-value="2"],
+  .review-stars:has(input[value="3"]:checked) label[data-value="3"] { color: #f59e0b !important; }
+  .review-stars:has(input[value="4"]:checked) label[data-value="1"],
+  .review-stars:has(input[value="4"]:checked) label[data-value="2"],
+  .review-stars:has(input[value="4"]:checked) label[data-value="3"],
+  .review-stars:has(input[value="4"]:checked) label[data-value="4"] { color: #f59e0b !important; }
+  .review-stars:has(input[value="5"]:checked) label { color: #f59e0b !important; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
   <!-- Breadcrumb -->
@@ -90,7 +110,7 @@
             {% for sz in product.sizes %}
             <label class="size-opt" for="size_{{ sz }}">
               <input type="radio" name="size" value="{{ sz }}" id="size_{{ sz }}"
-                     hidden required onchange="this.closest('.size-selector').querySelectorAll('.size-opt').forEach(e=>e.classList.remove('selected'));this.parentElement.classList.add('selected')"/>
+                     hidden onchange="this.closest('.size-selector').querySelectorAll('.size-opt').forEach(e=>e.classList.remove('selected'));this.parentElement.classList.add('selected')"/>
               {{ sz }}
             </label>
             {% endfor %}
@@ -131,16 +151,19 @@
             <i class="fas fa-shopping-bag me-2"></i> Add to Cart
           </button>
           {% if current_user.is_authenticated %}
-          <form method="POST" action="{{ url_for('customer.toggle_wishlist') }}" class="m-0">
-            <input type="hidden" name="product_id" value="{{ product._id }}"/>
-            <button type="submit" class="btn btn-outline-dark btn-lg"
-                    title="{{ 'Remove from Wishlist' if in_wishlist else 'Add to Wishlist' }}">
-              <i class="fa{% if in_wishlist %}s text-danger{% else %}r{% endif %} fa-heart"></i>
-            </button>
-          </form>
+          <button type="button" class="btn btn-outline-dark btn-lg"
+                  title="{{ 'Remove from Wishlist' if in_wishlist else 'Add to Wishlist' }}"
+                  onclick="document.getElementById('wishlistForm').submit()">
+            <i class="fa{% if in_wishlist %}s text-danger{% else %}r{% endif %} fa-heart"></i>
+          </button>
           {% endif %}
         </div>
       </form>
+      {% if current_user.is_authenticated %}
+      <form id="wishlistForm" method="POST" action="{{ url_for('customer.toggle_wishlist') }}" class="d-none">
+        <input type="hidden" name="product_id" value="{{ product._id }}"/>
+      </form>
+      {% endif %}
       {% else %}
       <div class="alert" style="background:#fdedec;border:none;border-radius:8px;color:#e74c3c">
         <i class="fas fa-exclamation-circle me-2"></i> This product is currently out of stock.
@@ -216,10 +239,10 @@
         <form method="POST" action="{{ url_for('customer.submit_review', product_id=product._id) }}">
           <div class="mb-3">
             <label class="form-label">Rating</label>
-            <div class="review-stars">
-              {% for i in range(5,0,-1) %}
+            <div class="review-stars" id="starRating">
+              {% for i in range(1,6) %}
               <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}"/>
-              <label for="star{{ i }}"><i class="fas fa-star"></i></label>
+              <label for="star{{ i }}" data-value="{{ i }}"><i class="fas fa-star"></i></label>
               {% endfor %}
             </div>
           </div>
@@ -280,5 +303,21 @@ function changeQty(delta) {
   const newVal = Math.min(max, Math.max(1, parseInt(inp.value) + delta));
   inp.value = newVal;
 }
+
+(function() {
+  const container = document.getElementById('starRating');
+  if (!container) return;
+  const labels = Array.from(container.querySelectorAll('label'));
+
+  labels.forEach(label => {
+    const val = parseInt(label.dataset.value);
+    label.addEventListener('mouseover', () => {
+      labels.forEach(l => l.classList.toggle('hovered', parseInt(l.dataset.value) <= val));
+    });
+  });
+  container.addEventListener('mouseleave', () => {
+    labels.forEach(l => l.classList.remove('hovered'));
+  });
+})();
 </script>
 {% endblock %}

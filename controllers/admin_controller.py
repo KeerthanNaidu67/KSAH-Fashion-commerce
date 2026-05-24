@@ -1,3 +1,11 @@
+# controllers/admin_controller.py
+# Admin controller for the KSAH Fashion E-Commerce platform.
+# Provides platform-wide management operations: dashboard statistics
+# (users, sellers, products, orders, revenue, monthly pipeline),
+# paginated user and product listing, user status toggling (suspend/activate),
+# product status toggling (activate/deactivate), and order status updates.
+# Admin accounts are protected from status changes. Used by routes/admin.py.
+
 from models.user import User
 from models.product import Product
 from models.order import Order

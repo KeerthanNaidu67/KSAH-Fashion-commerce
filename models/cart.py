@@ -1,3 +1,10 @@
+# models/cart.py
+# Shopping cart model for the KSAH Fashion E-Commerce platform.
+# Each customer has one Cart document in MongoDB (keyed by user_id).
+# CartItem represents a single product line in the cart with size, color,
+# quantity, and price. Cart supports add, update, remove, clear, and promo
+# code application. get_or_create() ensures a cart always exists for a user.
+
 from datetime import datetime
 from bson import ObjectId
 from database.db import get_db
@@ -6,6 +13,7 @@ from database.db import get_db
 class CartItem:
     def __init__(self, data: dict):
         self.product_id = data.get('product_id')
+        self.seller_id = data.get('seller_id')
         self.name = data.get('name', '')
         self.price = float(data.get('price', 0))
         self.image = data.get('image', '')
@@ -21,6 +29,7 @@ class CartItem:
     def to_dict(self) -> dict:
         return {
             'product_id': self.product_id,
+            'seller_id': self.seller_id,
             'name': self.name,
             'price': self.price,
             'image': self.image,
@@ -63,6 +72,7 @@ class Cart:
                 return
         self.items.append(CartItem({
             'product_id': product._id,
+            'seller_id': product.seller_id,
             'name': product.name,
             'price': product.price,
             'image': product.primary_image,
@@ -92,6 +102,7 @@ class Cart:
         self._save()
 
     def apply_promo(self, code: str) -> bool:
+        # Valid promo codes and their discount percentages
         PROMOS = {'FASHION20': 20, 'STYLE10': 10, 'NEW15': 15}
         discount = PROMOS.get(code.upper())
         if discount:

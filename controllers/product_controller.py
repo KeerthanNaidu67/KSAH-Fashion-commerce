@@ -1,3 +1,10 @@
+# controllers/product_controller.py
+# Product controller for the KSAH Fashion E-Commerce platform.
+# Handles customer-facing product operations: home page data (featured +
+# category previews), paginated product listing with filters, product detail
+# view with reviews, and review submission with duplicate prevention.
+# Used by routes/customer.py.
+
 from models.product import Product
 from models.review import Review
 from bson import ObjectId

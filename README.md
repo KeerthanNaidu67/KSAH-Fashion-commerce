@@ -6,6 +6,32 @@ A full-stack fashion e-commerce web application built with Python Flask, MongoDB
 
 ---
 
+## Table of Contents
+
+- [Team Members](#team-members)
+- [Tech Stack](#tech-stack)
+- [Features](#features)
+  - [Customer](#customer)
+  - [Seller](#seller)
+  - [Admin](#admin)
+- [Security](#security)
+- [Quick Start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [1. Clone the Repository](#1-clone-the-repository)
+  - [2. Create and Activate Virtual Environment](#2-create-and-activate-virtual-environment)
+  - [3. Install Dependencies](#3-install-dependencies)
+  - [4. Configure Environment Variables](#4-configure-environment-variables)
+  - [5. Seed the Database](#5-seed-the-database)
+  - [6. Run the App](#6-run-the-app)
+- [Demo Credentials](#demo-credentials)
+- [Promo Codes](#promo-codes)
+- [Project Structure](#project-structure)
+- [Database Collections](#database-collections)
+- [Architecture](#architecture)
+- [Testing](#testing)
+
+---
+
 ## Team Members
 
 | Name | Student ID | Role |
@@ -94,17 +120,35 @@ source .venv/bin/activate        # macOS / Linux
 pip install -r requirements.txt
 ```
 
-### 4. Seed the Database
+### 4. Configure Environment Variables
+
+Create a `.env` file in the root directory of the `fashion-ecommerce` project. You can copy the provided example file:
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and adjust the variables as needed:
+
+| Variable | Description | Default / Example Value |
+|---|---|---|
+| `SECRET_KEY` | Flask session encryption and security key | `fashion-ecommerce-secret-change-this-in-production` |
+| `MONGO_URI` | MongoDB connection string URI | `mongodb://localhost:27017/fashion_ecommerce` |
+| `FLASK_ENV` | Application environment status | `development` |
+| `FLASK_DEBUG` | Enable Flask debug mode (`1` for enabled, `0` for disabled) | `1` |
+| `PORT` | The port on which the web application runs | `9090` |
+
+### 5. Seed the Database
 ```bash
 python database/seed.py
 ```
 
-### 5. Run the App
+### 6. Run the App
 ```bash
 python app.py
 ```
 
-Visit: **http://localhost:5000**
+Visit: **http://localhost:9090** (or the port configured in `.env`)
 
 ---
 

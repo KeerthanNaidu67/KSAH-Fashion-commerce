@@ -133,10 +133,10 @@ Open `.env` and adjust the variables as needed:
 | Variable | Description | Default / Example Value |
 |---|---|---|
 | `SECRET_KEY` | Flask session encryption and security key | `fashion-ecommerce-secret-change-this-in-production` |
-| `MONGO_URI` | MongoDB connection string URI | `mongodb://localhost:27017/fashion_ecommerce` |
+| `MONGO_URI` | MongoDB connection string URI | `mongodb://localhost:*****/fashion_ecommerce` |
 | `FLASK_ENV` | Application environment status | `development` |
 | `FLASK_DEBUG` | Enable Flask debug mode (`1` for enabled, `0` for disabled) | `1` |
-| `PORT` | The port on which the web application runs | `9090` |
+| `PORT` | The port on which the web application runs | `9***` |
 
 ### 5. Seed the Database
 ```bash

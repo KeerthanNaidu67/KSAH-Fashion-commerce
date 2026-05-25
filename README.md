@@ -2,7 +2,7 @@
 
 A full-stack fashion e-commerce web application built with Python Flask, MongoDB, and Bootstrap 5, following the MVC architectural pattern. The platform supports three user roles — Customer, Seller, and Admin — each with dedicated dashboards and role-based access control.
 
-> ICT602 Software Engineering — Group Project 3
+> ICT602 Software Engineering
 
 ---
 
